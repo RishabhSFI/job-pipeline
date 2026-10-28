@@ -10,6 +10,7 @@
 #
 #   ./scripts/install-mac.sh                 # dashboard on 3001, run at 8:00
 #   PORT=3002 HOUR=7 ./scripts/install-mac.sh
+#   JOBPIPELINE_SKIP_AGENTS=1 ...   files only, no background jobs (used by tests)
 
 set -euo pipefail
 
@@ -60,6 +61,11 @@ mkdir -p credentials logs resumes
   cp config/applyKit.example.json config/applyKit.json
   echo "Created config/applyKit.json"
 }
+
+if [ -n "${JOBPIPELINE_SKIP_AGENTS:-}" ]; then
+  say "Done (background jobs skipped)"
+  exit 0
+fi
 
 say "Starting the dashboard at login (port $PORT)"
 cat > "$AGENTS/com.jobpipeline.dashboard.plist" <<EOF
@@ -117,10 +123,5 @@ say "Done"
 echo "Dashboard:   http://localhost:$PORT  (give it ~20 seconds to start)"
 echo "Daily run:   every day at $HOUR:00, log in logs/run.log"
 echo
-echo "Still to do (see SETUP.md):"
-[ -f credentials/keys.json ] || echo "  - save your Google service account key as credentials/keys.json"
-grep -q '^GOOGLE_SPREADSHEET_ID=your-spreadsheet-id' .env.local && echo "  - put your Google Sheet ID in .env.local"
-[ -f resumes/resume.pdf ] || echo "  - save your resume as resumes/resume.pdf"
-grep -q 'EDIT ME' config/applyKit.json && echo "  - replace the EDIT ME lines in config/applyKit.json"
-echo "  - tune config/profile.json to the roles you want"
-echo "Then run your first search:  npm run pipeline"
+echo "Next, run:  npm run setup"
+echo "It walks you through connecting Google, adding your resume and your first search."

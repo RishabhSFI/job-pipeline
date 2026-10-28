@@ -1,7 +1,8 @@
 #!/bin/bash
 # scripts/publish.sh
 # Copies this project's committed files into a separate clone of your public
-# repo, checks them against your private blocklist, and pushes one commit.
+# repo, checks them against your private blocklist, proves a fresh install
+# works (scripts/check-fresh.sh), and pushes one commit.
 # Your private files (.env.local, credentials/, resume, applyKit.json) are
 # gitignored, so they are never part of what gets copied.
 #
@@ -27,6 +28,13 @@ if [ -f "$SRC/.publish-blocklist" ]; then
     git -C "$DEST" checkout -- . && git -C "$DEST" clean -fdq
     exit 1
   fi
+fi
+
+echo "Checking that a fresh install works..."
+if ! "$SRC/scripts/check-fresh.sh" "$DEST"; then
+  echo "Stopped: a fresh install of this version fails. Nothing was published."
+  git -C "$DEST" checkout -- . && git -C "$DEST" clean -fdq
+  exit 1
 fi
 
 git -C "$DEST" add -A

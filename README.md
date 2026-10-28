@@ -8,7 +8,14 @@ apply from, plus one-click X searches for founders who are hiring.
 
 **To install it on your Mac, follow [SETUP.md](SETUP.md).** You can do it by
 hand or with an AI assistant such as Claude Code or Gemini (free for college
-students in 2026).
+students in 2026). The short version:
+
+```bash
+git clone https://github.com/RishabhSFI/job-pipeline.git ~/Projects/Job-pipeline
+cd ~/Projects/Job-pipeline && ./scripts/install-mac.sh
+npm run setup      # connects Google, adds your resume, runs your first search
+npm run doctor     # checks everything and says how to fix what's wrong
+```
 
 Built on [Job Pipeline by Daniel Chimezie](https://github.com/0xDaniiel/Job-pipeline),
 retargeted from developer jobs to startup and business roles. The rest of
