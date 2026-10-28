@@ -61,6 +61,9 @@ jobs:
           foreach ($want in "Settings file", "Daily job search scheduled", "Dashboard running") {
             if (-not ($out -match "✓ $want")) { throw "checkup did not pass: $want" }
           }
+          if ($out -match "MODULE_TYPELESS") { throw "Node module-type warning is back" }
+          # The checkup exits 1 here on purpose: this machine has no Google key.
+          exit 0
       - name: Uninstall removes the tasks
         shell: pwsh
         run: |

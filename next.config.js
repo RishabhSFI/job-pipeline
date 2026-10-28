@@ -7,9 +7,9 @@ const nextConfig = {
     outputFileTracingIncludes: {
       "/api/resume": ["./resumes/**/*"],
       "/api/approve": ["./resumes/**/*"],
-      "/api/kit": ["./config/applyKit.json"],
+      "/api/kit": ["./config/applyKit.json", "./config/applyKit.example.json"],
     },
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
