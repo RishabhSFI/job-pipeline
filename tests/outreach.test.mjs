@@ -8,7 +8,7 @@ import nodemailer from "nodemailer";
 // The store reads data/ under the working directory, so work in a temp dir.
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "outreach-"));
 process.chdir(tmp);
-const lib = await import(path.join(import.meta.dirname, "../lib/outreach.js"));
+const lib = await import(new URL("../lib/outreach.js", import.meta.url));
 const { guessEmails, companyDomain, followUpDateFor, isFollowUpDue, sentTodayCount, dailyCap, smtpStatus, gmailComposeUrl, clampNote } = lib;
 
 const GOOD_ENV = { SMTP_EMAIL: "me@gmail.com", SMTP_APP_PASSWORD: "abcd efgh ijkl mnop" };
