@@ -12,10 +12,13 @@ students in 2026). The short version:
 
 ```bash
 git clone https://github.com/RishabhSFI/job-pipeline.git ~/Projects/Job-pipeline
-cd ~/Projects/Job-pipeline && ./scripts/install-mac.sh
-npm run setup      # connects Google, adds your resume, runs your first search
-npm run doctor     # checks everything and says how to fix what's wrong
+cd ~/Projects/Job-pipeline
+./scripts/install-mac.sh     # Windows: powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
+npm run setup                # connects Google, adds your resume, runs your first search
+npm run doctor               # checks everything and says how to fix what's wrong
 ```
+
+Works on macOS and Windows 10/11.
 
 Built on [Job Pipeline by Daniel Chimezie](https://github.com/0xDaniiel/Job-pipeline),
 retargeted from developer jobs to startup and business roles. The rest of

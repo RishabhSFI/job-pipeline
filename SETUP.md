@@ -2,17 +2,17 @@
 
 Job Pipeline searches about 10,000 job postings every morning, keeps the ones
 that fit you, scores them, finds the salary, and puts the best 50 in your own
-Google Sheet. A dashboard on your Mac lets you approve jobs, copy your
+Google Sheet. A dashboard on your computer lets you approve jobs, copy your
 application answers, and track what you applied to. An X tab gives you
 one-click searches for founders posting roles on X.
 
-Everything runs on your own Mac with your own Google account. Nobody else
+Everything runs on your own Mac or Windows PC with your own Google account. Nobody else
 sees your jobs, resume or answers. It is free to run: the Google Sheets API
 costs nothing at this size, and every job source it reads is free.
 
 You need:
 
-- a Mac (the installer is Mac only)
+- a Mac or a Windows 10/11 PC
 - a personal Google account (school or work accounts often block step 4)
 - about 30 minutes
 
@@ -32,12 +32,14 @@ tailors the job matching to your resume. Two options:
   **Gemini CLI**, which works in your Terminal like Claude Code, also has a
   free tier with a personal Google account.
 
-Open your assistant in Terminal, give it your resume, and paste this:
+Open your assistant in Terminal (Mac) or PowerShell (Windows), give it your
+resume, and paste this:
 
 > I want to set up Job Pipeline from https://github.com/RishabhSFI/job-pipeline
-> on my Mac. Clone it into ~/Projects/Job-pipeline, read SETUP.md, and do the
+> on my computer. Clone it into a Projects folder in my home folder (not
+> Desktop, Documents, Downloads or OneDrive), read SETUP.md, and do the
 > setup with me step by step. Run the installer, walk me through the Google
-> Cloud steps, then have me run npm run setup in my own Terminal (it asks me
+> Cloud steps, then have me run npm run setup in my own terminal (it asks me
 > questions). After that, run npm run doctor and fix anything it flags. Then
 > tailor config/profile.json,
 > config/companies.json and config/applyKit.json to my resume and the kind of
@@ -50,10 +52,18 @@ tell you where you are stuck.
 
 ## The manual way
 
-### 1. Install Node.js
+Steps 1 to 3 differ between Mac and Windows. From step 4 on they are the same.
+On a Mac, type commands in **Terminal**. On Windows, use **PowerShell** (press
+the Windows key, type `PowerShell`, and open it).
 
-Download the **LTS** version from https://nodejs.org and install it. To check
-it worked, open Terminal and run:
+### 1. Install Node.js (and Git on Windows)
+
+Download the **LTS** version of Node.js from https://nodejs.org and install it.
+
+On Windows, also install Git from https://git-scm.com/download/win (the
+default options are fine). Then close PowerShell and open a new one.
+
+To check it worked, run:
 
 ```bash
 node -v
@@ -63,28 +73,55 @@ You need version 20 or newer.
 
 ### 2. Get the code
 
-Put the folder in `~/Projects`. Do **not** put it on your Desktop or in
-Documents or Downloads: macOS blocks background jobs from reading those
-folders, and the daily search would silently fail.
+Put the folder in a `Projects` folder in your home folder.
+
+- **Mac:** not on your Desktop or in Documents or Downloads. macOS blocks
+  background jobs from reading those folders, and the daily search would
+  silently fail.
+- **Windows:** not on your Desktop, in Documents, or anywhere in OneDrive.
+  OneDrive syncing breaks the app's files.
+
+On a Mac:
 
 ```bash
 mkdir -p ~/Projects && cd ~/Projects
 git clone https://github.com/RishabhSFI/job-pipeline.git Job-pipeline
 ```
 
+On Windows (PowerShell):
+
+```powershell
+mkdir $HOME\Projects -Force; cd $HOME\Projects
+git clone https://github.com/RishabhSFI/job-pipeline.git Job-pipeline
+```
+
 ### 3. Run the installer
+
+On a Mac:
 
 ```bash
 cd ~/Projects/Job-pipeline
 ./scripts/install-mac.sh
 ```
 
+On Windows (PowerShell):
+
+```powershell
+cd $HOME\Projects\Job-pipeline
+powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
+```
+
 It installs everything and sets up two background jobs:
 
 - the dashboard, which starts whenever you log in, at http://localhost:3001
-- the job search, which runs every day at 8:00 AM (or as soon as your Mac wakes, if it was asleep)
+- the job search, which runs every day at 8:00 AM. If your computer is
+  asleep it runs when it wakes. On Windows it also catches up later if the
+  PC was off.
 
-To use another port or time instead: `PORT=3002 HOUR=7 ./scripts/install-mac.sh`.
+To use another port or time instead:
+
+- Mac: `PORT=3002 HOUR=7 ./scripts/install-mac.sh`
+- Windows: add `-Port 3002 -Hour 7` to the end of the installer command
 
 ### 4. Make a Google key
 
@@ -117,16 +154,18 @@ school or work account. Start again from point 1 with a personal Gmail.
 ### 5. Run the guided setup
 
 ```bash
-cd ~/Projects/Job-pipeline
 npm run setup
 ```
+
+Run it from the project folder (`~/Projects/Job-pipeline` on a Mac,
+`$HOME\Projects\Job-pipeline` on Windows).
 
 It walks you through the rest, one question at a time:
 
 1. finds the key in your Downloads and moves it into place
 2. tells you which email to share your Google Sheet with, then asks for the sheet's link
 3. sets up the sheet's columns and colours
-4. asks you to drag in your resume PDF
+4. asks you to drag your resume PDF into the window
 5. opens your Apply kit so you can add your name, links and answers
 6. optionally connects Gmail for a daily digest email
 7. runs your first job search and opens your dashboard
@@ -168,9 +207,10 @@ to fit what you want, and give each one a summary under the same name in
 
 ## Keeping it running
 
-- Your Mac must be on for the 8 AM search. Asleep is fine: it runs when the Mac wakes. Shut down means that day is skipped.
+- **Mac:** your Mac must be on for the 8 AM search. Asleep is fine: it runs when the Mac wakes. Shut down means that day is skipped.
+- **Windows:** the search wakes the PC if it is asleep, and runs later if the PC was off at 8 AM.
 - Once a month, run `npm run check-companies` to drop companies whose job boards moved.
-- To get updates from this repo: `git pull`, then `./scripts/install-mac.sh` again, then `npm run doctor`. Your private files (`.env.local`, `credentials/`, your resume and `config/applyKit.json`) are never touched. If you edited `config/profile.json`, `config/companies.json` or `config/xSearches.json`, git may ask you to commit or stash your changes first.
+- To get updates from this repo: `git pull`, run the installer again (step 3), then `npm run doctor`. Your private files (`.env.local`, `credentials/`, your resume and `config/applyKit.json`) are never touched. If you edited `config/profile.json`, `config/companies.json` or `config/xSearches.json`, git may ask you to commit or stash your changes first.
 
 ## If something goes wrong
 
@@ -178,10 +218,11 @@ Run the checkup first. It tests every part of your setup and tells you
 exactly how to fix anything that is wrong:
 
 ```bash
-cd ~/Projects/Job-pipeline
 npm run doctor
 ```
 
 - Dashboard won't load: check `logs/dashboard.log`.
 - No new jobs in the morning: check `logs/run.log`.
-- To stop everything: `./scripts/uninstall-mac.sh`. Your files and sheet are kept.
+- To stop everything: `./scripts/uninstall-mac.sh` on a Mac, or
+  `powershell -ExecutionPolicy Bypass -File scripts\uninstall-windows.ps1` on Windows.
+  Your files and sheet are kept.

@@ -9,9 +9,10 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import readline from "readline";
-import { spawnSync, execSync } from "child_process";
+import { spawnSync } from "child_process";
 import { fileURLToPath } from "url";
-import { readEnv, readKey, sheetErrorFix, runChecks, printChecks } from "./doctor.mjs";
+import { readEnv, readKey, sheetErrorFix, runChecks, printChecks, dashboardPort } from "./doctor.mjs";
+import { PLATFORM, npmSpawnOptions, cleanDroppedPath } from "./platform.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ENV_FILE = path.join(ROOT, ".env.local");
@@ -90,7 +91,8 @@ async function stepKey() {
     const found = findDownloadedKey();
     if (found && (await yes(`Found a Google key in Downloads: ${path.basename(found)}. Use it?`))) {
       fs.mkdirSync(path.dirname(KEY_FILE), { recursive: true });
-      fs.renameSync(found, KEY_FILE);
+      fs.copyFileSync(found, KEY_FILE);
+      fs.unlinkSync(found);
       fs.chmodSync(KEY_FILE, 0o600);
       setEnv("GOOGLE_SERVICE_ACCOUNT_KEY_PATH", KEY_FILE);
       break;
@@ -155,7 +157,7 @@ async function stepResume() {
   const target = path.join(ROOT, "resumes", PROFILE.resumes[Object.keys(PROFILE.resumes)[0]]);
   while (!fs.existsSync(target)) {
     const answer = await ask("Drag your resume PDF into this window, then press Enter: ");
-    const file = answer.replace(/^['"]|['"]$/g, "").replace(/\\ /g, " ");
+    const file = cleanDroppedPath(answer);
     if (fs.existsSync(file) && file.toLowerCase().endsWith(".pdf")) {
       fs.copyFileSync(file, target);
     } else {
@@ -172,9 +174,10 @@ async function stepApplyKit() {
   if (!left) return console.log("✓ Apply kit filled in.");
   console.log(`config/applyKit.json has ${left} EDIT ME line(s): your name, links, answers to`);
   console.log("common application questions, and a short pitch for each kind of role.");
-  if (await yes("Open it in TextEdit now?")) {
-    spawnSync("open", ["-e", kit]);
-    await ask("Save it in TextEdit, then press Enter here... ");
+  const editor = PLATFORM.name === "Windows" ? "Notepad" : "TextEdit";
+  if (await yes(`Open it in ${editor} now?`)) {
+    PLATFORM.openFile(kit);
+    await ask(`Save it in ${editor}, then press Enter here... `);
   }
 }
 
@@ -200,12 +203,12 @@ async function stepGmail() {
 async function stepFirstRun() {
   step(6, "First job search");
   if (!(await yes("Run your first job search now? It takes about a minute."))) return;
-  spawnSync("npm", ["run", "pipeline"], { cwd: ROOT, stdio: "inherit" });
+  spawnSync("npm", ["run", "pipeline"], { cwd: ROOT, stdio: "inherit", ...npmSpawnOptions });
 }
 
 console.log("Job Pipeline setup. Press Ctrl+C any time to stop; run npm run setup to pick up again.");
 if (!fs.existsSync(ENV_FILE)) {
-  console.log("\nRun ./scripts/install-mac.sh first, then npm run setup.");
+  console.log(`\nRun ${PLATFORM.installCommand} first, then npm run setup.`);
   process.exit(1);
 }
 const key = await stepKey();
@@ -217,9 +220,9 @@ await stepFirstRun();
 
 console.log("\n── Checkup\n");
 printChecks(await runChecks());
+const url = `http://localhost:${dashboardPort()}`;
+console.log(`\nYour dashboard: ${url}`);
 try {
-  const port = (fs.readFileSync(path.join(os.homedir(), "Library/LaunchAgents/com.jobpipeline.dashboard.plist"), "utf-8").match(/<string>-p<\/string><string>(\d+)<\/string>/) || [])[1] || "3001";
-  console.log(`\nYour dashboard: http://localhost:${port}`);
-  execSync(`open http://localhost:${port}`);
+  PLATFORM.openUrl(url);
 } catch {}
 rl.close();

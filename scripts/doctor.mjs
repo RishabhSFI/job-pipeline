@@ -5,9 +5,8 @@
 //   npm run doctor -- --offline   skips the Google Sheet check
 
 import fs from "fs";
-import os from "os";
 import path from "path";
-import { execSync } from "child_process";
+import { PLATFORM } from "./platform.mjs";
 import { fileURLToPath } from "url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -71,20 +70,8 @@ async function sheetCheck(env, key) {
   return meta.data.properties.title;
 }
 
-function dashboardPort() {
-  const plist = path.join(os.homedir(), "Library/LaunchAgents/com.jobpipeline.dashboard.plist");
-  if (!fs.existsSync(plist)) return null;
-  const m = fs.readFileSync(plist, "utf-8").match(/<string>-p<\/string><string>(\d+)<\/string>/);
-  return m ? Number(m[1]) : 3001;
-}
-
-function agentLoaded(name) {
-  try {
-    execSync(`launchctl print gui/${process.getuid()}/com.jobpipeline.${name}`, { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
+export function dashboardPort(env = readEnv()) {
+  return Number(env?.DASHBOARD_PORT) || 3001;
 }
 
 // Each check: { name, ok, fix, optional }
@@ -95,15 +82,12 @@ export async function runChecks({ offline = false } = {}) {
   const major = Number(process.versions.node.split(".")[0]);
   add("Node.js 20 or newer", major >= 20, "Install the LTS version from https://nodejs.org.");
 
-  const home = os.homedir();
-  const blocked = ["Desktop", "Documents", "Downloads"].some((d) => ROOT.startsWith(path.join(home, d)));
-  add("Project folder is outside Desktop, Documents and Downloads", !blocked,
-    "Move the folder to ~/Projects and run ./scripts/install-mac.sh again. macOS blocks background jobs from those folders.");
+  add("Project folder is in a safe place", !PLATFORM.blockedFolder(ROOT), PLATFORM.blockedFolderFix);
 
-  add("Dependencies installed", fs.existsSync(p("node_modules")), "Run ./scripts/install-mac.sh.");
+  add("Dependencies installed", fs.existsSync(p("node_modules")), `Run ${PLATFORM.installCommand}.`);
 
   const env = readEnv();
-  add("Settings file (.env.local)", !!env, "Run ./scripts/install-mac.sh to create it.");
+  add("Settings file (.env.local)", !!env, `Run ${PLATFORM.installCommand} to create it.`);
 
   const key = readKey(env);
   add("Google key (credentials/keys.json)", !!key,
@@ -133,19 +117,19 @@ export async function runChecks({ offline = false } = {}) {
     ? (fs.readFileSync(kitFile, "utf-8").match(/EDIT ME/g) || []).length
     : -1;
   add("Apply kit filled in (config/applyKit.json)", editMe === 0,
-    editMe < 0 ? "Run ./scripts/install-mac.sh to create it." : `Replace the ${editMe} EDIT ME line(s) in config/applyKit.json.`);
+    editMe < 0 ? `Run ${PLATFORM.installCommand} to create it.` : `Replace the ${editMe} EDIT ME line(s) in config/applyKit.json.`);
 
-  if (process.platform === "darwin") {
-    add("Daily job search scheduled", agentLoaded("daily"), "Run ./scripts/install-mac.sh.");
-    const port = dashboardPort();
+  if (!offline) {
+    add("Daily job search scheduled", PLATFORM.isScheduled("daily"), `Run ${PLATFORM.installCommand}.`);
+    const port = dashboardPort(env);
     let up = false;
-    if (port) {
-      try {
-        up = (await fetch(`http://localhost:${port}`, { signal: AbortSignal.timeout(5000) })).ok;
-      } catch {}
-    }
-    add(`Dashboard running${port ? ` (http://localhost:${port})` : ""}`, up,
-      port ? "It can take 20 seconds after login. Otherwise check logs/dashboard.log." : "Run ./scripts/install-mac.sh.");
+    try {
+      up = (await fetch(`http://localhost:${port}`, { signal: AbortSignal.timeout(5000) })).ok;
+    } catch {}
+    add(`Dashboard running (http://localhost:${port})`, up,
+      PLATFORM.isScheduled("dashboard")
+        ? "It can take 20 seconds after you log in. Otherwise check logs/dashboard.log."
+        : `Run ${PLATFORM.installCommand}.`);
   }
 
   add("Gmail set up for digest emails", !!env?.SMTP_APP_PASSWORD && env.SMTP_APP_PASSWORD !== "your-app-password",

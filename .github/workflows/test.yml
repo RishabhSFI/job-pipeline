@@ -11,4 +11,58 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test "tests/*.test.mjs"
+      - run: npm ci
+      - run: npm test
+
+  install-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fresh install (files only)
+        run: ./scripts/check-fresh.sh
+
+  install-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install with scheduled tasks
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
+      - name: Private files were created
+        shell: pwsh
+        run: |
+          foreach ($f in ".env.local", "config\applyKit.json", "node_modules") {
+            if (-not (Test-Path $f)) { throw "installer did not create $f" }
+          }
+          if ((Get-Content .env.local -Raw) -notmatch "(?m)^DASHBOARD_PORT=3001") { throw "port not recorded" }
+      - name: Tests
+        run: npm test
+      - name: Dashboard answers on its port
+        shell: pwsh
+        run: |
+          for ($i = 0; $i -lt 60; $i++) {
+            try { if ((Invoke-WebRequest http://localhost:3001 -UseBasicParsing -TimeoutSec 5).StatusCode -eq 200) { exit 0 } } catch {}
+            Start-Sleep 3
+          }
+          Get-Content logs\dashboard.log -ErrorAction SilentlyContinue
+          throw "dashboard did not start"
+      - name: Checkup sees both scheduled tasks and the dashboard
+        shell: pwsh
+        run: |
+          [Console]::OutputEncoding = [Text.Encoding]::UTF8
+          $out = (node scripts/doctor.mjs | Out-String)
+          Write-Host $out
+          foreach ($want in "Settings file", "Daily job search scheduled", "Dashboard running") {
+            if (-not ($out -match "✓ $want")) { throw "checkup did not pass: $want" }
+          }
+      - name: Uninstall removes the tasks
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File scripts\uninstall-windows.ps1
+          if (Get-ScheduledTask -TaskName "JobPipeline-*" -ErrorAction SilentlyContinue) { throw "tasks still registered" }

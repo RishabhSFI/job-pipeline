@@ -57,6 +57,11 @@ mkdir -p credentials logs resumes
   sed -i '' "s|^CRON_SECRET=.*|CRON_SECRET=$(openssl rand -hex 24)|" .env.local
   echo "Created .env.local"
 }
+if grep -q '^DASHBOARD_PORT=' .env.local; then
+  sed -i '' "s|^DASHBOARD_PORT=.*|DASHBOARD_PORT=$PORT|" .env.local
+else
+  printf '\n# Set by the installer: where the dashboard runs\nDASHBOARD_PORT=%s\n' "$PORT" >> .env.local
+fi
 [ -f config/applyKit.json ] || {
   cp config/applyKit.example.json config/applyKit.json
   echo "Created config/applyKit.json"
