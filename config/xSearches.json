@@ -1,0 +1,52 @@
+{
+  "_comment": "Saved X searches for the dashboard's X tab. Each one opens live X results in a new browser tab; nothing is scraped. Edit, add or remove searches freely; the query uses X's own search syntax (OR, quotes, -filter:replies, lang:en). Refresh the dashboard to see changes.",
+  "always": "-filter:replies lang:en",
+  "popularMinLikes": 10,
+  "searches": [
+    {
+      "label": "Chief of Staff",
+      "why": "Founders hiring someone to run things alongside them.",
+      "query": "(\"hiring\" OR \"we're hiring\" OR \"looking for\") \"chief of staff\""
+    },
+    {
+      "label": "Founder's Associate",
+      "why": "Junior right-hand roles that report straight to a founder.",
+      "query": "(\"hiring\" OR \"looking for\") (\"founder's associate\" OR \"founders associate\" OR \"founding associate\")"
+    },
+    {
+      "label": "BizOps / Strategy & Ops",
+      "why": "Small-team operations and strategy roles.",
+      "query": "(\"hiring\" OR \"looking for\") (\"bizops\" OR \"business operations\" OR \"strategy & operations\" OR \"strategy and operations\")"
+    },
+    {
+      "label": "First hire / generalist",
+      "why": "Early teams looking for a do-everything first non-engineering hire.",
+      "query": "(\"hiring\" OR \"looking for\") (\"first non-technical hire\" OR \"first ops hire\" OR \"first business hire\" OR \"generalist\") (startup OR founder)"
+    },
+    {
+      "label": "Startup finance",
+      "why": "Strategic finance and first finance hires at startups.",
+      "query": "(\"hiring\" OR \"looking for\") (\"strategic finance\" OR \"first finance hire\" OR \"finance lead\" OR \"head of finance\") startup"
+    },
+    {
+      "label": "Startup internships",
+      "why": "Founders posting ops, strategy, growth or finance internships.",
+      "query": "(\"hiring\" OR \"looking for\") (intern OR interns OR internship) (startup OR founder) (ops OR operations OR strategy OR growth OR finance)"
+    },
+    {
+      "label": "YC startups",
+      "why": "Y Combinator founders hiring for non-engineering roles.",
+      "query": "(YC OR \"Y Combinator\") (\"hiring\" OR \"looking for\") (ops OR operations OR generalist OR \"chief of staff\" OR \"founder's associate\" OR growth)"
+    },
+    {
+      "label": "Toronto startups",
+      "why": "Close to home: Toronto founders hiring for ops and strategy.",
+      "query": "Toronto (\"hiring\" OR \"looking for\") (startup OR founder) (ops OR operations OR generalist OR strategy OR \"chief of staff\" OR growth)"
+    },
+    {
+      "label": "AI training work",
+      "why": "Remote contract work training AI models in finance.",
+      "query": "(\"hiring\" OR \"looking for\") (\"AI trainer\" OR \"AI tutor\" OR \"finance experts\" OR \"domain experts\") (finance OR banking OR \"private equity\")"
+    }
+  ]
+}

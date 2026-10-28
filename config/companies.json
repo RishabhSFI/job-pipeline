@@ -1,0 +1,42 @@
+{
+  "_comment": "Company slugs to check on each ATS. Find a slug in a company's careers URL: boards.greenhouse.io/SLUG, jobs.lever.co/SLUG, or jobs.ashbyhq.com/SLUG. Wrong slugs just log a 404 and are skipped, so delete any that 404.",
+  "greenhouse": [
+    "anthropic",
+    "stripe",
+    "coinbase",
+    "brex",
+    "robinhood",
+    "carta",
+    "scaleai",
+    "gusto",
+    "mercury",
+    "faire",
+    "snorkelai"
+  ],
+  "_greenhouse_howto": "URL: boards.greenhouse.io/{slug}. API: https://boards-api.greenhouse.io/v1/boards/{slug}/jobs",
+  "lever": [
+    "wealthfront"
+  ],
+  "_lever_howto": "URL: jobs.lever.co/{slug}. API: https://api.lever.co/v0/postings/{slug}?mode=json",
+  "ashby": [
+    "openai",
+    "plaid",
+    "ramp",
+    "mercor",
+    "harvey",
+    "cohere",
+    "rogo",
+    "notion",
+    "perplexity",
+    "float",
+    "mosaic",
+    "benchling",
+    "wealthsimple",
+    "handshake",
+    "neofinancial"
+  ],
+  "_ashby_howto": "URL: jobs.ashbyhq.com/{slug}. API: https://api.ashbyhq.com/posting-api/job-board/{slug}",
+  "bamboohr": [],
+  "_bamboohr_howto": "URL: {slug}.bamboohr.com/careers. API: https://{slug}.bamboohr.com/careers/list",
+  "notes": "Startups and fast-moving companies hiring for ops, strategy, finance and AI-training roles in Canada, the US or remote. YC and Hacker News startups are pulled separately. Run node scripts/check-companies.mjs monthly."
+}

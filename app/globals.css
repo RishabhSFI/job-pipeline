@@ -1,0 +1,387 @@
+:root {
+  --bg: #f6f3ee;
+  --surface: #ffffff;
+  --border: #e4dfd6;
+  --text: #1b2033;
+  --text-muted: #5e6578;
+  --text-faint: #8f95a5;
+  --navy: #1f2a54;
+  --score: #a86a0c;
+
+  --status-awaiting: #9a6700;
+  --status-approved: #2f5fd0;
+  --status-applied: #2e7d52;
+  --status-manual: #c2410c;
+  --status-interview: #6d4bc2;
+  --status-rejected: #b42318;
+  --status-none: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    var(--font-body),
+    -apple-system,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.pageHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.wordmark {
+  font-family: var(--font-display), serif;
+  font-size: 34px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.tagline {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.headActions {
+  display: flex;
+  gap: 10px;
+}
+
+.ghostBtn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+.ghostBtn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.ghostBtn.danger:hover {
+  border-color: var(--status-rejected);
+  color: var(--status-rejected);
+}
+
+.statRow {
+  display: flex;
+  gap: 48px;
+  padding: 22px 0;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNumber {
+  font-family: var(--font-display), serif;
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 26px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 0 12px 0;
+  margin-bottom: -1px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.jobRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.jobRow:last-child {
+  border-bottom: none;
+}
+.jobRow:hover {
+  background: #fbfaf7;
+}
+
+.jobMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.jobTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+.jobTitle a {
+  color: var(--text);
+  text-decoration: none;
+}
+.jobTitle a:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.jobCompany {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+}
+.company {
+  font-weight: 500;
+  color: var(--text);
+}
+.location {
+  color: var(--text-muted);
+}
+
+.jobMetaLine {
+  margin-top: 10px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+}
+
+.scoreTag {
+  color: var(--score);
+  font-weight: 600;
+}
+
+.cvTag {
+  color: var(--text-muted);
+}
+
+.statusPill {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+  border: 1px solid currentColor;
+}
+
+.jobActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+.actionBtn:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.actionBtn.primary {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #ffffff;
+}
+.actionBtn.primary:hover {
+  background: #2b3a73;
+}
+
+.empty,
+.loading {
+  color: var(--text-faint);
+  padding: 64px 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .jobRow {
+    flex-direction: column;
+  }
+  .statRow {
+    gap: 28px;
+  }
+}
+.liLinks {
+  margin-top: 10px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+}
+.liLinks a {
+  color: var(--status-approved);
+  text-decoration: none;
+}
+.liLinks a:hover {
+  text-decoration: underline;
+}
+.jobActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 300px;
+}
+a.actionBtn {
+  text-decoration: none;
+  display: inline-block;
+}
+.applyEmail {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.kitPanel {
+  margin-top: 16px;
+  padding: 18px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.kitTitle {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 14px 0 8px;
+}
+.kitTitle:first-child {
+  margin-top: 0;
+}
+.kitChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.chip:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.answerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.answerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13.5px;
+  min-width: 0;
+}
+.answerLabel {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.needsEdit span:last-child {
+  color: var(--status-manual);
+}
+.kitLinks {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.xIntro {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 18px 0 14px;
+  max-width: 640px;
+}
+.jobActions a {
+  text-decoration: none;
+  text-align: center;
+}
+.salaryTag {
+  color: var(--text);
+  font-weight: 600;
+}

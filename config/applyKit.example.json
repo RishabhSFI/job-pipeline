@@ -1,0 +1,57 @@
+{
+  "_comment": "Copy this file to config/applyKit.json (the installer does it for you) and replace every EDIT ME. applyKit.json is private and never committed. Summaries are keyed by the track names in config/profile.json.",
+  "profile": [
+    {
+      "label": "Full name",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Email",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Phone",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "LinkedIn",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "School",
+      "value": "EDIT ME: school, degree, graduation date"
+    }
+  ],
+  "answers": [
+    {
+      "label": "Where are you based?",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Work authorization",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Availability / start date",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Salary expectation",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Why this kind of role?",
+      "value": "EDIT ME"
+    },
+    {
+      "label": "Internship or full-time?",
+      "value": "EDIT ME"
+    }
+  ],
+  "summaries": {
+    "finance": "EDIT ME: 2-3 sentence pitch for this kind of role.",
+    "operations": "EDIT ME: 2-3 sentence pitch for this kind of role.",
+    "ai_training": "EDIT ME: 2-3 sentence pitch for this kind of role.",
+    "startup": "EDIT ME: 2-3 sentence pitch for startup generalist roles."
+  }
+}

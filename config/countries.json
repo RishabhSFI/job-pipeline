@@ -1,0 +1,54 @@
+{
+  "_comment": "Where jobs may be. A job passes if its location names Canada or the United States (by country, province/state, or a major city), is remote with no region named, or is blank. A remote job limited to a region in foreign_regions (and not also naming Canada or the US) is dropped. Edit any list below. Matching is whole-word and case-insensitive; see lib/filters.js.",
+  "eligible_countries": ["Canada", "United States"],
+  "regions": {
+    "Canada": {
+      "names": [
+        "alberta", "british columbia", "manitoba", "new brunswick", "newfoundland",
+        "labrador", "nova scotia", "ontario", "prince edward island", "quebec",
+        "saskatchewan", "yukon", "nunavut", "northwest territories"
+      ],
+      "codes": ["AB", "BC", "MB", "NB", "NS", "NT", "NU", "ON", "QC", "YT"],
+      "cities": [
+        "toronto", "vancouver", "montreal", "calgary", "ottawa", "waterloo", "edmonton",
+        "winnipeg", "mississauga", "kitchener", "halifax", "quebec city", "victoria bc",
+        "saskatoon", "regina", "gta"
+      ]
+    },
+    "United States": {
+      "names": [
+        "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
+        "delaware", "florida", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas",
+        "kentucky", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota",
+        "mississippi", "missouri", "montana", "nebraska", "nevada", "new hampshire",
+        "new jersey", "new mexico", "new york", "north carolina", "north dakota", "ohio",
+        "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina", "south dakota",
+        "tennessee", "texas", "utah", "vermont", "virginia", "washington", "west virginia",
+        "wisconsin", "wyoming", "district of columbia"
+      ],
+      "codes": [
+        "AK", "CA", "CT", "DC", "FL", "GA", "HI", "IA", "KS", "KY", "LA", "MA", "MD",
+        "ME", "MI", "MN", "MO", "MS", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH",
+        "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY"
+      ],
+      "cities": [
+        "new york", "nyc", "brooklyn", "manhattan", "san francisco", "sf bay area", "bay area",
+        "silicon valley", "palo alto", "mountain view", "san jose", "san mateo", "menlo park",
+        "redwood city", "boston", "cambridge ma", "chicago", "seattle", "austin", "los angeles",
+        "san diego", "santa monica", "denver", "boulder", "atlanta", "miami", "dallas", "houston",
+        "philadelphia", "pittsburgh", "minneapolis", "raleigh", "salt lake city", "nashville",
+        "indianapolis", "charlotte", "phoenix", "washington dc", "d.c."
+      ]
+    }
+  },
+  "ambiguous_codes_not_used": "Two-letter codes that are also common country codes (DE, IN, IL, AR, CO, ID, NL, SK, AL, MT, AZ, PE) are left out of the lists above, so 'Berlin, DE' and 'Mumbai, IN' do not pass. The full state names and the cities still match.",
+  "foreign_regions": [
+    "europe", "european", "emea", "eu", "european union", "uk", "united kingdom", "britain",
+    "england", "scotland", "ireland", "germany", "france", "spain", "italy", "netherlands",
+    "poland", "portugal", "sweden", "norway", "denmark", "finland", "switzerland", "austria",
+    "belgium", "apac", "asia", "india", "china", "japan", "singapore", "australia",
+    "new zealand", "philippines", "pakistan", "indonesia", "latam", "latin america", "brazil",
+    "mexico", "argentina", "colombia", "africa", "nigeria", "south africa", "kenya", "egypt",
+    "israel", "uae", "dubai", "middle east", "south korea", "hong kong", "turkey"
+  ]
+}

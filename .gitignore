@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js and vercel
+.next/
+out/
+.vercel/
+
+# secrets: never commit
+.env
+.env.*
+!.env.local.example
+credentials/
+
+# logs and archives
+logs/
+*.log
+*.tgz
+
+# personal notes and OS files
+znotes.md
+.DS_Store
+Thumbs.db
+znotes.md
+# your own details: never commit
+config/applyKit.json
+resumes/*.pdf
