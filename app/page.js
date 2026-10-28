@@ -20,6 +20,9 @@ const STATUS_COLOR = {
 const CV_LABEL = Object.fromEntries(
   Object.entries(profile.tracks).map(([key, t]) => [key, `${t.label} CV`]),
 );
+const ROLE_KEYWORDS = Object.values(profile.tracks).flatMap(
+  (t) => t.titleKeywords,
+);
 const DEFAULT_CV_KEY =
   Object.keys(profile.tracks).find((k) => profile.tracks[k].isDefault) ||
   Object.keys(profile.tracks)[0];
@@ -317,7 +320,12 @@ export default function Dashboard() {
         <div className="panel">
           {visible.map((job) => {
             const applyEmail = applyEmailOf(job);
-            const links = linkedinLinks(job.Company);
+            const links = linkedinLinks(
+              job.Company,
+              job["Role Title"],
+              profile.linkedinSearches,
+              ROLE_KEYWORDS,
+            );
             const kitOpen = openKit === job._row;
             return (
               <div className="jobRow" key={job._row}>
@@ -376,27 +384,16 @@ export default function Dashboard() {
                     </div>
                   )}
                   <div className="liLinks">
-                    <a
-                      href={links.company}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Company on LinkedIn
-                    </a>
-                    <a
-                      href={links.recruiters}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Find recruiters
-                    </a>
-                    <a
-                      href={links.engineers}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Find engineers
-                    </a>
+                    {links.map((l) => (
+                      <a
+                        key={l.label}
+                        href={l.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {l.label}
+                      </a>
+                    ))}
                   </div>
                   {kitOpen && kit && (
                     <KitPanel

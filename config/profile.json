@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for matching and CVs (read by lib/profile.js and lib/scorer.js). To add a CV: add a file under resumes/ and list it in 'resumes', then point a track at it. Keywords are matched as whole words, case-insensitive. titleKeywords decide the track and whether a job is relevant at all; skillKeywords are a tiebreak. Track keys finance, operations and ai_training are used elsewhere, so keep them. titleBonus is the points a title match in that track adds.",
+  "_comment": "Single source of truth for matching and CVs (read by lib/profile.js and lib/scorer.js). To add a CV: add a file under resumes/ and list it in 'resumes', then point a track at it. Keywords are matched as whole words, case-insensitive. titleKeywords decide the track and whether a job is relevant at all; skillKeywords are a tiebreak. Add, rename or remove tracks freely; give each one a summary under the same key in config/applyKit.json. titleBonus is the points a title match in that track adds. linkedinSearches are the people-search links on each job; {company} and {role} are filled in.",
   "resumes": {
     "main": "resume.pdf"
   },
@@ -326,6 +326,50 @@
       "100,000",
       "50,000",
       "10,000+"
+    ]
+  },
+  "linkedinSearches": [
+    {
+      "label": "Recruiters",
+      "keywords": "{company} recruiter"
+    },
+    {
+      "label": "People in this role",
+      "keywords": "{company} {role}"
+    },
+    {
+      "label": "Founders & leaders",
+      "keywords": "{company} founder"
+    }
+  ],
+  "search": {
+    "_comment": "What the job boards are asked for. terms are typed into Himalayas and Remotive search. The category lists use each board's own names. Change these when you change what you are looking for.",
+    "terms": [
+      "chief of staff",
+      "founder's associate",
+      "business operations",
+      "strategy",
+      "financial analyst",
+      "fp&a",
+      "ai trainer",
+      "operations intern"
+    ],
+    "ycombinatorRoles": [
+      "operations",
+      "finance"
+    ],
+    "remotiveCategories": [
+      "finance-legal",
+      "business",
+      "product"
+    ],
+    "weworkremotelyFeeds": [
+      "remote-management-and-finance-jobs",
+      "all-other-remote-jobs"
+    ],
+    "simplifySkipCategories": [
+      "Hardware",
+      "Hardware Engineering"
     ]
   }
 }

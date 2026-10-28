@@ -133,7 +133,9 @@ it and wait two minutes.
 | The roles you want and the words that score them | `config/profile.json` |
 | Companies to watch | `config/companies.json`, then run `npm run check-companies` |
 | X searches | `config/xSearches.json` |
-| Your name for application emails | The `YOUR_` lines in `.env.local` |
+| The email sent to email-apply jobs | `emailTemplate` in `config/applyKit.json` |
+| LinkedIn people searches on each job | `linkedinSearches` in `config/profile.json` |
+| What the job boards are searched for | `search` in `config/profile.json` |
 
 `config/profile.json` comes tuned for entry-level startup generalist,
 operations, finance and AI-training roles in Canada and the US. Each track

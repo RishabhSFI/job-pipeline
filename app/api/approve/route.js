@@ -57,6 +57,7 @@ export async function POST(request) {
             title: job["Role Title"] || "",
             company: job.Company || "",
             resumeFile: resumeFileFor(job["CV Version Used"]),
+            trackKey: job["CV Version Used"],
           },
           emailMatch[0],
         );

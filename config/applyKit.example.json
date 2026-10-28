@@ -53,5 +53,7 @@
     "operations": "EDIT ME: 2-3 sentence pitch for this kind of role.",
     "ai_training": "EDIT ME: 2-3 sentence pitch for this kind of role.",
     "startup": "EDIT ME: 2-3 sentence pitch for startup generalist roles."
-  }
+  },
+  "_emailTemplate_help": "Used when a job applies by email. {role}, {company}, {name} and {links} (every link in profile) are filled in; {summary} is your summary for that job's track.",
+  "emailTemplate": "Hi,\n\nI'm applying for the {role} role at {company}. I've attached my resume.\n\n{summary}\n\nI'd love to talk about how I could help. Happy to share more or jump on a call whenever suits you.\n\nBest,\n{name}\n{links}"
 }
