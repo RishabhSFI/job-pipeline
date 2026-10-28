@@ -4,18 +4,21 @@
 #   - installs dependencies
 #   - creates .env.local, config/applyKit.json and credentials/ if missing
 #   - starts the dashboard at login (http://localhost:$PORT)
-#   - runs the job search every day at $HOUR:00
+#   - runs the job search every $HOURS_BETWEEN_RUNS hours, and at login
 # Safe to run again: it replaces its own background jobs and never
-# overwrites your settings.
+# overwrites your settings. The digest email time is DIGEST_HOUR in .env.local.
 #
-#   ./scripts/install-mac.sh                 # dashboard on 3001, run at 8:00
-#   PORT=3002 HOUR=7 ./scripts/install-mac.sh
+#   ./scripts/install-mac.sh                 # dashboard on 3001, search every 4 hours
+#   PORT=3002 HOURS_BETWEEN_RUNS=6 ./scripts/install-mac.sh
 #   JOBPIPELINE_SKIP_AGENTS=1 ...   files only, no background jobs (used by tests)
 
 set -euo pipefail
 
 PORT="${PORT:-3001}"
-HOUR="${HOUR:-8}"
+HOURS_BETWEEN_RUNS="${HOURS_BETWEEN_RUNS:-4}"
+case "$HOURS_BETWEEN_RUNS" in
+  '' | *[!0-9]* | 0) echo "HOURS_BETWEEN_RUNS must be a whole number of hours, 1 or more."; exit 1 ;;
+esac
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 AGENTS="$HOME/Library/LaunchAgents"
 UID_NUM="$(id -u)"
@@ -26,7 +29,7 @@ case "$DIR" in
   "$HOME/Desktop"* | "$HOME/Documents"* | "$HOME/Downloads"*)
     echo "This folder is inside Desktop, Documents or Downloads: $DIR"
     echo "macOS blocks background jobs from reading those folders, so the"
-    echo "daily run would fail. Move the folder (for example to ~/Projects)"
+    echo "scheduled search would fail. Move the folder (for example to ~/Projects)"
     echo "and run this script again."
     exit 1
     ;;
@@ -96,7 +99,9 @@ cat > "$AGENTS/com.jobpipeline.dashboard.plist" <<EOF
 </plist>
 EOF
 
-say "Scheduling the daily job search at $HOUR:00"
+# StartInterval: a run missed while the Mac sleeps happens when it wakes.
+# RunAtLoad: a Mac that was shut down searches again at login.
+say "Scheduling the job search every $HOURS_BETWEEN_RUNS hours"
 cat > "$AGENTS/com.jobpipeline.daily.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -107,8 +112,8 @@ cat > "$AGENTS/com.jobpipeline.daily.plist" <<EOF
   <array><string>/bin/bash</string><string>$DIR/run-daily.sh</string></array>
   <key>EnvironmentVariables</key>
   <dict><key>PATH</key><string>$NODE_BIN:/usr/bin:/bin</string></dict>
-  <key>StartCalendarInterval</key>
-  <dict><key>Hour</key><integer>$HOUR</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StartInterval</key><integer>$((HOURS_BETWEEN_RUNS * 3600))</integer>
+  <key>RunAtLoad</key><true/>
   <key>StandardErrorPath</key><string>$DIR/logs/launchd.err</string>
 </dict>
 </plist>
@@ -126,7 +131,7 @@ done
 
 say "Done"
 echo "Dashboard:   http://localhost:$PORT  (give it ~20 seconds to start)"
-echo "Daily run:   every day at $HOUR:00, log in logs/run.log"
+echo "Job search:  every $HOURS_BETWEEN_RUNS hours and at login, log in logs/run.log"
 echo
 echo "Next, run:  npm run setup"
 echo "It walks you through connecting Google, adding your resume and your first search."

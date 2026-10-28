@@ -3,17 +3,17 @@
 #   - installs dependencies
 #   - creates .env.local, config/applyKit.json and credentials\ if missing
 #   - starts the dashboard when you log in (http://localhost:$Port)
-#   - runs the job search every day at $Hour:00, catching up if the PC was off
+#   - runs the job search every $EveryHours hours, catching up if the PC was off
 # Safe to run again: it replaces its own scheduled tasks and never
-# overwrites your settings.
+# overwrites your settings. The digest email time is DIGEST_HOUR in .env.local.
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
-#   powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1 -Port 3002 -Hour 7
+#   powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1 -Port 3002 -EveryHours 6
 #   ... -SkipTasks    files only, no scheduled tasks (used by tests)
 
 param(
   [int]$Port = 3001,
-  [int]$Hour = 8,
+  [ValidateRange(1, 24)][int]$EveryHours = 4,
   [switch]$SkipTasks
 )
 
@@ -96,22 +96,27 @@ Register-ScheduledTask -TaskName "JobPipeline-dashboard" -Force `
   -Action $dashAction -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME) `
   -Settings $dashSettings -Description "Job Pipeline dashboard on http://localhost:$Port" | Out-Null
 
-Say "Scheduling the daily job search at ${Hour}:00"
+Say "Scheduling the job search every $EveryHours hours"
 $trim = "if (Test-Path 'logs\run.log') { Get-Content 'logs\run.log' -Tail 2000 | Set-Content 'logs\run.log.tmp'; Move-Item -Force 'logs\run.log.tmp' 'logs\run.log' }"
-$runCmd = "Set-Location '$Dir'; $trim; & '$nodeExe' --max-old-space-size=512 --env-file=.env.local scripts/run-pipeline.mjs *>> 'logs\run.log'"
+$runCmd = "Set-Location '$Dir'; $trim; & '$nodeExe' --max-old-space-size=512 --env-file=.env.local scripts/run-pipeline.mjs --scheduled *>> 'logs\run.log'"
 $runAction = New-ScheduledTaskAction -Execute "powershell.exe" `
   -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"$runCmd`""
 $runSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
   -StartWhenAvailable -WakeToRun -ExecutionTimeLimit (New-TimeSpan -Minutes 30)
+# A daily trigger at midnight that repeats every $EveryHours hours for the day.
+# StartWhenAvailable runs a missed search once the PC is back on.
+$runTrigger = New-ScheduledTaskTrigger -Daily -At "00:00"
+$runTrigger.Repetition = (New-ScheduledTaskTrigger -Once -At "00:00" `
+  -RepetitionInterval (New-TimeSpan -Hours $EveryHours) -RepetitionDuration (New-TimeSpan -Days 1)).Repetition
 Register-ScheduledTask -TaskName "JobPipeline-daily" -Force `
-  -Action $runAction -Trigger (New-ScheduledTaskTrigger -Daily -At ("{0:D2}:00" -f $Hour)) `
-  -Settings $runSettings -Description "Job Pipeline daily job search" | Out-Null
+  -Action $runAction -Trigger $runTrigger `
+  -Settings $runSettings -Description "Job Pipeline job search, every $EveryHours hours" | Out-Null
 
 Start-ScheduledTask -TaskName "JobPipeline-dashboard"
 
 Say "Done"
 Write-Host "Dashboard:   http://localhost:$Port  (give it ~20 seconds to start)"
-Write-Host "Daily run:   every day at ${Hour}:00, log in logs\run.log"
+Write-Host "Job search:  every $EveryHours hours, log in logs\run.log"
 Write-Host ""
 Write-Host "Next, run:  npm run setup"
 Write-Host "It walks you through connecting Google, adding your resume and your first search."

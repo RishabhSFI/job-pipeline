@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for matching and CVs (read by lib/profile.js and lib/scorer.js). To add a CV: add a file under resumes/ and list it in 'resumes', then point a track at it. Keywords are matched as whole words, case-insensitive. titleKeywords decide the track and whether a job is relevant at all; skillKeywords are a tiebreak. Add, rename or remove tracks freely; give each one a summary under the same key in config/applyKit.json. titleBonus is the points a title match in that track adds. linkedinSearches are the people-search links on each job; {company} and {role} are filled in.",
+  "_comment": "Single source of truth for matching and CVs (read by lib/profile.js and lib/scorer.js). To add a CV: add a file under resumes/ and list it in 'resumes', then point a track at it. Keywords are matched as whole words, case-insensitive. titleKeywords decide the track and whether a job is relevant at all; skillKeywords are a tiebreak. Add, rename or remove tracks freely; give each one a summary under the same key in config/applyKit.json. titleBonus is the points a title match in that track adds. linkedinSearches are the people-search links on each job; {company}, {role} and {school} (from the School line of your Apply kit) are filled in; a search that uses {school} is skipped when no school is known.",
   "resumes": {
     "main": "resume.pdf"
   },
@@ -211,7 +211,14 @@
       "svp",
       "evp",
       "managing director",
-      "mba"
+      "mba",
+      "phd",
+      "ph.d",
+      "doctoral",
+      "postdoc",
+      "postdoctoral",
+      "masters",
+      "master's"
     ],
     "maxYearsAsked": 3
   },
@@ -328,6 +335,24 @@
       "10,000+"
     ]
   },
+  "freshness": {
+    "_comment": "New postings get filled first, so a job posted fewer than 'days' days ago adds 'points'. Only the first matching step counts.",
+    "steps": [
+      {
+        "days": 2,
+        "points": 8
+      },
+      {
+        "days": 7,
+        "points": 4
+      }
+    ]
+  },
+  "location": {
+    "_comment": "Places you'd like to work, matched as text in the job's location (for example \"Toronto\" or \"London, ON\"). A job in one of them adds 'points'. Leave preferred empty to skip this.",
+    "preferred": [],
+    "points": 8
+  },
   "linkedinSearches": [
     {
       "label": "Recruiters",
@@ -340,6 +365,14 @@
     {
       "label": "Founders & leaders",
       "keywords": "{company} founder"
+    },
+    {
+      "label": "University recruiters",
+      "keywords": "{company} university recruiter"
+    },
+    {
+      "label": "Alumni from your school",
+      "keywords": "{company} {school}"
     }
   ],
   "search": {

@@ -1,6 +1,6 @@
 #!/bin/bash
 # run-daily.sh
-# What cron runs every day. It starts the pipeline gently so it can never
+# What the schedule runs every few hours (cron on a server, launchd on a Mac). It starts the pipeline gently so it can never
 # hurt the other services on this server:
 #   - lowest CPU priority (nice 19)
 #   - V8 memory capped at 512 MB
@@ -17,4 +17,4 @@ fi
 
 echo 1000 > /proc/$$/oom_score_adj 2>/dev/null
 
-exec nice -n 19 node --max-old-space-size=512 --env-file=.env.local scripts/run-pipeline.mjs >> logs/run.log 2>&1
+exec nice -n 19 node --max-old-space-size=512 --env-file=.env.local scripts/run-pipeline.mjs --scheduled >> logs/run.log 2>&1

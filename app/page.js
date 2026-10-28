@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { linkedinLinks } from "../lib/linkedin.js";
+import { useEffect, useState, useMemo, useRef } from "react";
+import Link from "next/link";
+import { linkedinLinks, schoolFromKit } from "../lib/linkedin.js";
+import {
+  applyFilters,
+  cleanFilters,
+  sortJobs,
+  SORTS,
+  postedLabel,
+  DEFAULT_FILTERS,
+  scoreReasons,
+} from "../lib/jobFilters.js";
 import profile from "../config/profile.json";
+import countries from "../config/countries.json";
 import XSearches from "./XSearches.js";
+import FetchStatus from "./FetchStatus.js";
 
 const STATUS_COLOR = {
   "Awaiting Your Approval": "var(--status-awaiting)",
@@ -12,6 +24,7 @@ const STATUS_COLOR = {
   "Applied (Auto)": "var(--status-applied)",
   "Needs Manual Apply": "var(--status-manual)",
   Interview: "var(--status-interview)",
+  Offer: "var(--status-offer)",
   Rejected: "var(--status-rejected)",
   "No Response": "var(--status-none)",
   "Follow-up Sent": "var(--status-approved)",
@@ -27,8 +40,11 @@ const DEFAULT_CV_KEY =
   Object.keys(profile.tracks).find((k) => profile.tracks[k].isDefault) ||
   Object.keys(profile.tracks)[0];
 
+const FILTERS_KEY = "jobFilters";
+const TRACK_KEYS = Object.keys(profile.tracks);
+
 const TABS = [
-  { key: "all", label: "All", match: () => true },
+  { key: "all", label: "All", match: (s) => s !== "Closed" },
   {
     key: "awaiting",
     label: "Awaiting approval",
@@ -41,7 +57,9 @@ const TABS = [
   },
   { key: "applied", label: "Applied", match: (s) => s.startsWith("Applied") },
   { key: "interview", label: "Interview", match: (s) => s === "Interview" },
+  { key: "offer", label: "Offer", match: (s) => s === "Offer" },
   { key: "rejected", label: "Rejected", match: (s) => s === "Rejected" },
+  { key: "closed", label: "Closed", match: (s) => s === "Closed" },
 ];
 
 const KIT_STATUSES = [
@@ -57,6 +75,56 @@ function applyEmailOf(job) {
   if (method !== "email") return null;
   const match = (job.Notes || "").match(EMAIL_RE);
   return match ? match[0] : null;
+}
+
+// The match score. Click, tap, Enter or Space opens the reasons behind it.
+function ScoreTag({ job }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const reasons = scoreReasons(job);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => {
+      if (e.type === "keydown" ? e.key === "Escape" : !ref.current?.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
+
+  return (
+    <span className="scoreWrap" ref={ref}>
+      <button
+        type="button"
+        className="scoreTag scoreBtn"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((o) => !o)}
+      >
+        Match {job["Match Score"]}
+      </button>
+      {open && (
+        <div className="scorePopover" role="dialog" aria-label="Why this score">
+          <div className="popTitle">Why this score</div>
+          {reasons.length ? (
+            <ul>
+              {reasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>The reasons appear for jobs found after this update.</p>
+          )}
+        </div>
+      )}
+    </span>
+  );
 }
 
 function KitPanel({ job, kit, copied, onCopy }) {
@@ -143,6 +211,9 @@ export default function Dashboard() {
   const [kit, setKit] = useState(null);
   const [openKit, setOpenKit] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+  const school = useMemo(() => (kit ? schoolFromKit(kit.profile) : ""), [kit]);
 
   async function loadJobs() {
     setLoading(true);
@@ -169,7 +240,26 @@ export default function Dashboard() {
   useEffect(() => {
     loadJobs();
     loadKit();
+    try {
+      const saved = JSON.parse(localStorage.getItem(FILTERS_KEY) || "null");
+      setFilters(cleanFilters(saved, TRACK_KEYS));
+    } catch {
+      // storage unavailable or unreadable: start from the defaults
+    }
+    setFiltersLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) return;
+    try {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+    } catch {
+      // private window or blocked storage: filters just won't be remembered
+    }
+  }, [filters, filtersLoaded]);
+
+  const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
+  const filtersActive = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS);
 
   async function copy(text, key) {
     try {
@@ -241,14 +331,17 @@ export default function Dashboard() {
     return c;
   }, [jobs]);
 
-  const visible = useMemo(() => {
+  const inTab = useMemo(() => {
     const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
-    return jobs
-      .filter((j) => tab.match(j.Status || ""))
-      .sort(
-        (a, b) => Number(b["Match Score"] || 0) - Number(a["Match Score"] || 0),
-      );
+    return jobs.filter((j) => tab.match(j.Status || ""));
   }, [jobs, activeTab]);
+
+  const visible = useMemo(() => {
+    return sortJobs(
+      applyFilters(inTab, filters, { regions: countries.regions }),
+      filters.sort,
+    );
+  }, [inTab, filters]);
 
   return (
     <div className="wrap">
@@ -258,6 +351,7 @@ export default function Dashboard() {
           <div className="tagline">Job application tracker</div>
         </div>
         <div className="headActions">
+          <FetchStatus onDone={loadJobs} />
           <button className="ghostBtn" onClick={loadJobs}>
             Refresh
           </button>
@@ -288,6 +382,10 @@ export default function Dashboard() {
           <span className="statNumber">{counts.interview || 0}</span>
           <span className="statLabel">Interviews</span>
         </div>
+        <div className="stat">
+          <span className="statNumber">{counts.offer || 0}</span>
+          <span className="statLabel">Offers</span>
+        </div>
       </div>
 
       <div className="tabs">
@@ -308,13 +406,95 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {activeTab !== "x" && (
+        <div className="filterBar">
+          <select
+            aria-label="Job type"
+            value={filters.type}
+            onChange={(e) => setFilter("type", e.target.value)}
+          >
+            <option value="all">All types</option>
+            <option value="Internship">Internship</option>
+            <option value="Full-time">Full-time</option>
+          </select>
+          <select
+            aria-label="Posted"
+            value={filters.posted}
+            onChange={(e) => setFilter("posted", e.target.value)}
+          >
+            <option value="any">Any time</option>
+            <option value="24h">Last 24 hours</option>
+            <option value="48h">Last 48 hours</option>
+            <option value="7d">Last 7 days</option>
+          </select>
+          <select
+            aria-label="Location"
+            value={filters.location}
+            onChange={(e) => setFilter("location", e.target.value)}
+          >
+            <option value="all">Anywhere</option>
+            <option value="canada">Canada</option>
+            <option value="us">US</option>
+            <option value="remote">Remote</option>
+          </select>
+          <select
+            aria-label="Track"
+            value={filters.track}
+            onChange={(e) => setFilter("track", e.target.value)}
+          >
+            <option value="all">All tracks</option>
+            {TRACK_KEYS.map((k) => (
+              <option key={k} value={k}>
+                {profile.tracks[k].label}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Sort"
+            value={filters.sort}
+            onChange={(e) => setFilter("sort", e.target.value)}
+          >
+            {Object.entries(SORTS).map(([key, label]) => (
+              <option key={key} value={key}>
+                Sort: {label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="search"
+            aria-label="Search role or company"
+            placeholder="Search role or company"
+            value={filters.search}
+            onChange={(e) => setFilter("search", e.target.value)}
+          />
+        </div>
+      )}
+      {activeTab !== "x" && !loading && (
+        <div className="matchLine">
+          {visible.length === inTab.length
+            ? `${visible.length} ${visible.length === 1 ? "job" : "jobs"}`
+            : `${visible.length} of ${inTab.length} jobs match`}
+          {filtersActive && (
+            <button
+              type="button"
+              className="linkBtn"
+              onClick={() => setFilters(DEFAULT_FILTERS)}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+
       {activeTab === "x" ? (
         <XSearches />
       ) : loading ? (
         <div className="loading">Loading jobs...</div>
       ) : visible.length === 0 ? (
         <div className="empty">
-          Nothing here yet. The next daily run will add new matches.
+          {filtersActive
+            ? "No jobs match these filters."
+            : "Nothing here yet. The next daily run will add new matches."}
         </div>
       ) : (
         <div className="panel">
@@ -325,19 +505,33 @@ export default function Dashboard() {
               job["Role Title"],
               profile.linkedinSearches,
               ROLE_KEYWORDS,
+              school,
             );
             const kitOpen = openKit === job._row;
             return (
-              <div className="jobRow" key={job._row}>
+              <div
+                className={`jobRow ${job.Status === "Closed" ? "closed" : ""}`}
+                key={job._row}
+              >
                 <div className="jobMain">
                   <p className="jobTitle">
-                    <a
-                      href={job.Link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {job["Role Title"] || "Untitled role"}
-                    </a>
+                    {job.id ? (
+                      <Link href={`/jobs/${job.id}`}>
+                        {job["Role Title"] || "Untitled role"}
+                      </Link>
+                    ) : (
+                      job["Role Title"] || "Untitled role"
+                    )}
+                    {job.Link && (
+                      <a
+                        className="postingLink"
+                        href={job.Link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Posting ↗
+                      </a>
+                    )}
                   </p>
                   <div className="jobCompany">
                     <span className="company">
@@ -355,9 +549,10 @@ export default function Dashboard() {
                   </div>
                   <div className="jobMetaLine">
                     {job["Match Score"] && (
-                      <span className="scoreTag">
-                        Match {job["Match Score"]}
-                      </span>
+                      <ScoreTag job={job} />
+                    )}
+                    {postedLabel(job) && (
+                      <span className="cvTag">{postedLabel(job)}</span>
                     )}
                     {job["Est. Salary"] &&
                       job["Est. Salary"] !== "Not listed" && (
@@ -440,6 +635,17 @@ export default function Dashboard() {
                       onClick={() => updateStatus(job._row, "Interview")}
                     >
                       Got Interview
+                    </button>
+                  )}
+                  {(job.Status === "Applied" ||
+                    job.Status === "Applied (Auto)" ||
+                    job.Status === "Interview") && (
+                    <button
+                      className="actionBtn"
+                      disabled={busyRow === job._row}
+                      onClick={() => updateStatus(job._row, "Offer")}
+                    >
+                      Got Offer
                     </button>
                   )}
                   {KIT_STATUSES.includes(job.Status) && (

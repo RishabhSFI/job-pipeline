@@ -132,8 +132,35 @@ export async function runChecks({ offline = false } = {}) {
         : `Run ${PLATFORM.installCommand}.`);
   }
 
+  const resumeData = p("data", "resume.json");
+  let resumeName = "";
+  try {
+    resumeName = JSON.parse(fs.readFileSync(resumeData, "utf-8")).name;
+  } catch {}
+  add("Resume Studio has your resume (data/resume.json)", !!resumeName && resumeName !== "Your Name",
+    resumeName ? "Replace the template in data/resume.json with your resume, or run npm run setup to import it with Gemini." : "Run npm run setup.");
+
+  add("Gemini key for AI writing", !!env?.GEMINI_API_KEY,
+    "Optional and free. Run npm run setup and choose to add a Gemini key.", true);
+
   add("Gmail set up for digest emails", !!env?.SMTP_APP_PASSWORD && env.SMTP_APP_PASSWORD !== "your-app-password",
     "Optional. Run npm run setup and choose to set up Gmail.", true);
+
+  const gmailReady = !!env?.SMTP_EMAIL && !!env?.SMTP_APP_PASSWORD &&
+    env.SMTP_APP_PASSWORD !== "your-app-password" && env.SMTP_EMAIL !== "you@example.com";
+  const alertsHow = "Optional. Set up Gmail (npm run setup), then on linkedin.com/jobs search for a role, turn on \"Set alert\" and choose email. Indeed alerts work too.";
+  if (!gmailReady || env.READ_JOB_ALERTS === "false") {
+    add("LinkedIn job alerts readable", false, gmailReady ? "Turned off by READ_JOB_ALERTS=false in .env.local." : alertsHow, true);
+  } else if (!offline) {
+    try {
+      const { countAlertEmails } = await import("../lib/fetchers/emailAlerts.js");
+      const n = await countAlertEmails(env, 14);
+      add(`LinkedIn job alerts readable (${n} alert email(s) in the last 14 days)`, n > 0, alertsHow, true);
+    } catch (err) {
+      add("LinkedIn job alerts readable", false,
+        `Could not log in to Gmail over IMAP (${err.responseText || err.message}). Check the App Password, and that IMAP is on in Gmail settings.`, true);
+    }
+  }
 
   return checks;
 }

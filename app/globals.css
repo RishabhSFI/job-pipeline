@@ -13,6 +13,7 @@
   --status-applied: #2e7d52;
   --status-manual: #c2410c;
   --status-interview: #6d4bc2;
+  --status-offer: #0f766e;
   --status-rejected: #b42318;
   --status-none: #6b7280;
 }
@@ -181,6 +182,14 @@ body {
   color: var(--text);
   text-decoration: none;
 }
+.jobTitle .postingLink {
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--status-approved);
+  white-space: nowrap;
+}
+
 .jobTitle a:hover {
   color: var(--navy);
   text-decoration: underline;
@@ -384,4 +393,227 @@ a.actionBtn {
 .salaryTag {
   color: var(--text);
   font-weight: 600;
+}
+
+.topNav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  overflow-x: auto;
+}
+.topNavBrand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--navy);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.topNavLinks {
+  display: flex;
+  gap: 20px;
+}
+.topNavLink {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.topNavLink:hover {
+  color: var(--text);
+}
+.topNavLink.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+}
+
+/* Filters, match line, closed jobs */
+.filterBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0 4px;
+}
+.filterBar select,
+.filterBar input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 13.5px;
+  min-width: 0;
+}
+.filterBar input {
+  flex: 1 1 180px;
+}
+.filterBar select:focus,
+.filterBar input:focus {
+  outline: 2px solid var(--navy);
+  outline-offset: 1px;
+}
+.matchLine {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 10px 0 14px;
+}
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--status-approved);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.linkBtn.warn {
+  color: var(--status-manual);
+}
+.jobRow.closed {
+  opacity: 0.55;
+}
+
+/* Score popover */
+.scoreWrap {
+  position: relative;
+  display: inline-block;
+}
+.scoreBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--score);
+}
+.scoreBtn:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.scorePopover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 260px;
+  max-width: calc(100vw - 48px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 24px rgba(27, 32, 51, 0.14);
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+}
+.popTitle {
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.scorePopover ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.scorePopover p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* Fetch now and source status */
+.fetchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.fetchInfo {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.primaryGhost {
+  color: var(--navy);
+  border-color: var(--navy);
+}
+.ghostBtn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.fetchMessage {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.sourcePanel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 14px;
+  box-shadow: 0 6px 24px rgba(27, 32, 51, 0.14);
+}
+.sourceRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.sourceRow:last-child {
+  border-bottom: none;
+}
+.sourceError {
+  color: var(--status-rejected);
+  word-break: break-word;
+}
+@media (max-width: 640px) {
+  .pageHead {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .headActions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .fetchBox {
+    justify-content: flex-start;
+  }
+  .fetchMessage {
+    text-align: left;
+  }
+  .sourcePanel {
+    right: auto;
+    left: 0;
+  }
+}
+.headActions {
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
 }

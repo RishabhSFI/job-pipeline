@@ -16,6 +16,6 @@ export async function POST(request) {
   if (!checkAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const result = await runPipeline();
+  const result = await runPipeline({ trigger: "manual" });
   return NextResponse.json(result, { status: result.success ? 200 : 500 });
 }

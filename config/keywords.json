@@ -1,0 +1,11 @@
+{
+  "_comment": "Terms the keyword match looks for in job postings, on top of the skills and keywords in config/profile.json. Whole words, case-insensitive. Add the tools and skills that matter in your field.",
+  "terms": [
+    "excel", "google sheets", "sql", "python", "tableau", "power bi", "looker", "salesforce", "hubspot", "notion", "jira", "asana", "airtable", "zapier",
+    "financial modeling", "forecasting", "budgeting", "variance analysis", "fp&a", "valuation", "dcf", "unit economics", "pricing", "cash flow", "p&l", "revenue", "kpi", "kpis", "okrs", "metrics", "dashboard", "reporting",
+    "market research", "competitive analysis", "go-to-market", "gtm", "sales operations", "revenue operations", "partnerships", "business development", "customer success", "growth",
+    "operations", "process improvement", "project management", "program management", "stakeholder management", "cross-functional", "strategy", "strategic planning", "fundraising", "investor relations", "due diligence",
+    "data analysis", "analytics", "a/b testing", "automation", "ai", "llm", "llms", "machine learning", "prompt engineering", "rlhf",
+    "communication", "presentation", "powerpoint", "writing", "ownership", "autonomy", "fast-paced", "ambiguity", "startup", "early-stage", "founder", "founders", "self-starter", "problem solving", "attention to detail"
+  ]
+}

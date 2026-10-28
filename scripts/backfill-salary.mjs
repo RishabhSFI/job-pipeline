@@ -7,7 +7,7 @@
 //   ... --all   redoes every row, not just the missing ones
 
 import { getAllJobs, setSalaries } from "../lib/sheets.js";
-import { fetchAllJobs } from "../lib/fetchers/index.js";
+import { fetchAll } from "../lib/fetchers/index.js";
 import { resolveSalary, simplifyIdMap, normalizeLink } from "../lib/salary.js";
 
 const all = process.argv.includes("--all");
@@ -16,7 +16,7 @@ const rows = (await getAllJobs()).filter(
 );
 console.log(`${rows.length} rows to check`);
 
-const raw = await fetchAllJobs();
+const raw = (await fetchAll()).jobs;
 const byLink = new Map(raw.map((j) => [normalizeLink(j.link), j]));
 const simplifyIds = simplifyIdMap(raw);
 

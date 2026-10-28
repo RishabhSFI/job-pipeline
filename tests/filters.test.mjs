@@ -5,7 +5,6 @@ import {
   isLocationRestricted,
   isRemoteJob,
   filterJobs,
-  deduplicate,
 } from "../lib/filters.js";
 
 test("Canada and the US are accepted by country, province, state or city", () => {
@@ -120,16 +119,5 @@ test("filterJobs keeps North American and open jobs and drops the rest", () => {
   assert.deepEqual(
     out.map((j) => j.location),
     ["Toronto, ON", "Remote"],
-  );
-});
-
-test("deduplicate removes known links, repeats and jobs with no link", () => {
-  const out = deduplicate(
-    [{ link: "a" }, { link: "b" }, { link: "b" }, { link: "" }, { link: "c" }],
-    new Set(["a"]),
-  );
-  assert.deepEqual(
-    out.map((j) => j.link),
-    ["b", "c"],
   );
 });

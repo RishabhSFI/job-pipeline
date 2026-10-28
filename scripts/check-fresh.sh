@@ -12,7 +12,10 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 # Every file git would share (tracked or new), never gitignored ones.
-(cd "$SRC" && git ls-files -z -co --exclude-standard | xargs -0 tar -cf -) | tar -x -C "$TMP"
+# (git still lists files deleted but not yet committed; skip those.)
+(cd "$SRC" && git ls-files -z -co --exclude-standard |
+  while IFS= read -r -d '' f; do [ -e "$f" ] && printf '%s\0' "$f"; done |
+  xargs -0 tar -cf -) | tar -x -C "$TMP"
 for f in .env.local credentials/keys.json config/applyKit.json; do
   [ ! -e "$TMP/$f" ] || { echo "FAIL: private file $f is in the shared copy"; exit 1; }
 done

@@ -27,3 +27,6 @@ znotes.md
 config/applyKit.json
 resumes/*.pdf
 .publish-blocklist
+
+# your private app data: resume, versions, postings, contacts
+data/

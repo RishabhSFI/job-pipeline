@@ -19,6 +19,8 @@ import {
 } from "../../../lib/sheets.js";
 import { sendApplication } from "../../../lib/autoApply.js";
 import { resumeFileFor } from "../../../lib/profile.js";
+import { logEvent } from "../../../lib/timeline.js";
+import { jobId } from "../../../lib/jobId.js";
 
 export const maxDuration = 30;
 const ALLOWED_STATUSES = new Set(Object.values(STATUS));
@@ -42,10 +44,14 @@ export async function POST(request) {
     }
 
     const rowNumber = Number(row);
+    const all = await getAllJobs();
+    const job = all.find((j) => j._row === rowNumber);
+    const setStatus = async (newStatus) => {
+      await updateStatus(rowNumber, newStatus);
+      if (job?.Link) logEvent(jobId(job.Link), "status", newStatus);
+    };
 
     if (status === STATUS.APPROVED) {
-      const all = await getAllJobs();
-      const job = all.find((j) => j._row === rowNumber);
       const method = (job?.["Submission Method"] || "").trim().toLowerCase();
       const emailMatch = (job?.Notes || "").match(
         /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/,
@@ -62,21 +68,21 @@ export async function POST(request) {
           emailMatch[0],
         );
         if (sent) {
-          await updateStatus(rowNumber, STATUS.APPLIED_AUTO);
+          await setStatus(STATUS.APPLIED_AUTO);
           await setFollowUpDate(rowNumber, 7);
           return NextResponse.json({ success: true, sent: true });
         }
         // Sending failed: keep it Approved so the next run retries.
-        await updateStatus(rowNumber, STATUS.APPROVED);
+        await setStatus(STATUS.APPROVED);
         return NextResponse.json({ success: true, sent: false });
       }
 
       // Web-form job: nothing to send, go straight to the manual queue.
-      await updateStatus(rowNumber, STATUS.NEEDS_MANUAL);
+      await setStatus(STATUS.NEEDS_MANUAL);
       return NextResponse.json({ success: true, sent: false });
     }
 
-    await updateStatus(rowNumber, status);
+    await setStatus(status);
     if (FOLLOW_UP_STATUSES.has(status)) {
       await setFollowUpDate(rowNumber, 7);
     }

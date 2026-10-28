@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeMatchScore, pickCvVersion, scoreAll } from "../lib/scorer.js";
-import { resumeFileFor, trackLabel, DEFAULT_TRACK } from "../lib/profile.js";
+import { computeMatchScore, explainScore, scoreWhy, pickCvVersion, scoreAll } from "../lib/scorer.js";
+import { resumeFileFor, trackLabel, DEFAULT_TRACK, PROFILE } from "../lib/profile.js";
 
 const description =
   "Build financial models in Excel and support valuation and cash flow forecasting for the team. ".repeat(
@@ -131,4 +131,67 @@ test("small-team postings score above big-company postings for the same title", 
     description: "Join a Fortune 500 multinational with 100,000 employees worldwide.",
   });
   assert.ok(small > big, `${small} vs ${big}`);
+});
+
+const NOW = Date.parse("2026-10-28T12:00:00Z");
+const labels = (j) => explainScore(j, NOW).reasons.map((r) => r.label);
+
+test("every point of the score has a plain-English reason", () => {
+  const j = {
+    title: "Founder's Associate Intern",
+    description: "Small team, Y Combinator backed. Build models in Excel.",
+  };
+  const { score, reasons } = explainScore(j, NOW);
+  assert.equal(score, 30 + reasons.reduce((s, r) => s + r.points, 0));
+  assert.ok(labels(j).includes("Startup Generalist title"));
+  assert.ok(labels(j).includes("entry level: intern"));
+  assert.ok(labels(j).some((l) => l.startsWith("small team: small team, y combinator")));
+  assert.equal(computeMatchScore(j, NOW), score);
+});
+
+test("senior and excluded titles say why they lost points", () => {
+  const senior = explainScore({ title: "Senior Financial Analyst" }, NOW).reasons;
+  assert.deepEqual(senior.find((r) => r.label === "too senior: senior"), { points: -45, label: "too senior: senior" });
+  assert.ok(labels({ title: "Software Engineer, Strategy" }).includes("excluded title: engineer"));
+});
+
+test("a title that fits no track is capped, and the cap is a reason", () => {
+  const j = { title: "Intern", description: "Small team early-stage seed series a startup. ".repeat(10), employmentType: "x" };
+  const { score, reasons } = explainScore(j, NOW);
+  assert.equal(score, 54);
+  assert.ok(reasons.some((r) => r.label === "title fits none of your tracks" && r.points < 0));
+});
+
+test("fresh postings score higher, older ones get nothing", () => {
+  const base = { title: "Financial Analyst Intern", description: "" };
+  const ago = (days) => ({ ...base, postedAt: new Date(NOW - days * 86_400_000).toISOString() });
+  const plain = computeMatchScore(base, NOW);
+  assert.ok(computeMatchScore(ago(1), NOW) > computeMatchScore(ago(5), NOW));
+  assert.ok(computeMatchScore(ago(5), NOW) > plain);
+  assert.equal(computeMatchScore(ago(30), NOW), plain);
+  assert.equal(computeMatchScore({ ...base, postedAt: "" }, NOW), plain);
+  assert.ok(labels(ago(1)).includes("posted 1 day ago"));
+});
+
+test("a job in a preferred place scores higher, and nothing changes when none are set", () => {
+  const j = { title: "Financial Analyst Intern", location: "Toronto, ON, Canada" };
+  const before = computeMatchScore(j, NOW);
+  const saved = PROFILE.location;
+  PROFILE.location = { preferred: ["Toronto"], points: 8 };
+  try {
+    assert.equal(computeMatchScore(j, NOW), Math.min(100, before + 8));
+    assert.ok(labels(j).includes("near you: Toronto"));
+  } finally {
+    PROFILE.location = saved;
+  }
+});
+
+test("Score Why lists the biggest reasons, signed, biggest first", () => {
+  const why = scoreWhy([
+    { points: 5, label: "full description", minor: true },
+    { points: 4, label: "posted 3 days ago" },
+    { points: 30, label: "Startup Generalist title" },
+    { points: -45, label: "too senior: senior" },
+  ]);
+  assert.equal(why, "too senior: senior −45 · Startup Generalist title +30 · posted 3 days ago +4");
 });

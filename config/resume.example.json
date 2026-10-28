@@ -1,0 +1,82 @@
+{
+  "_comment": "Your resume as data. Resume Studio reads this as the base for every tailored version. Wrap words in **double asterisks** for bold. tracks on a bullet lists the track keys from config/profile.json it suits best; empty means every track. This is a template: npm run setup copies it to data/resume.json for you to fill in, or ask an AI assistant to fill it from your resume.",
+  "name": "Your Name",
+  "contact": [
+    {
+      "text": "555-555-5555"
+    },
+    {
+      "text": "you@example.com",
+      "url": "mailto:you@example.com"
+    },
+    {
+      "text": "linkedin.com/in/you",
+      "url": "https://www.linkedin.com/in/you"
+    }
+  ],
+  "sections": [
+    {
+      "id": "education",
+      "title": "Education",
+      "kind": "entries",
+      "entries": [
+        {
+          "id": "school",
+          "org": "Your University",
+          "location": "City, ST",
+          "role": "Degree and major",
+          "dates": "Expected May 2027",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "id": "experience",
+      "title": "Work Experience",
+      "kind": "entries",
+      "entries": [
+        {
+          "id": "job-1",
+          "org": "Company",
+          "location": "City, ST",
+          "role": "Your Title",
+          "dates": "Month 2025 – Present",
+          "bullets": [
+            {
+              "id": "job-1-a",
+              "text": "Did something specific with a **measurable result**, e.g. cut reporting time by **40%**",
+              "tracks": []
+            },
+            {
+              "id": "job-1-b",
+              "text": "Owned a project end to end with **cross-functional** partners",
+              "tracks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "title": "Skills & Interests",
+      "kind": "skills",
+      "groups": [
+        {
+          "id": "skills",
+          "label": "Skills",
+          "items": [
+            "Excel",
+            "SQL"
+          ]
+        },
+        {
+          "id": "interests",
+          "label": "Interests",
+          "items": [
+            "Something you enjoy"
+          ]
+        }
+      ]
+    }
+  ]
+}

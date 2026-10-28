@@ -1,6 +1,6 @@
 # Job Pipeline
 
-A Next.js app that searches about 10,000 job postings every morning, keeps
+A Next.js app that searches about 10,000 job postings every few hours, keeps
 entry-level startup, operations, finance and AI-training roles in Canada, the
 US or remote, scores them against your profile, finds the salary, logs the
 best ones in your own Google Sheet, and gives you a dashboard to approve and
@@ -27,15 +27,19 @@ this README describes how the code works.
 ## How it works
 
 ```
-cron (7am daily)  ->  POST /api/run
+schedule (every 4 hours)  ->  scripts/run-pipeline.mjs  ->  lib/pipeline.js
                          |
-   1. lib/fetchers/      pull jobs from 8 sources
-   2. lib/filters.js     keep Canada, US and remote jobs, drop duplicates
-   3. lib/scorer.js      score each job, pick the right CV
-   4. lib/sheets.js      write the best new matches to the sheet
-   5. lib/emailApply.js  find application emails in descriptions
-   6. approvals          send email applications, queue the rest
-   7. lib/mailer.js      follow-up reminders and one daily digest
+   1. lib/fetchers/      pull jobs, with posted dates, from every source
+   2. lib/closing.js     close sheet jobs no longer listed, reopen returning ones
+   3. lib/jobType.js     internship or full-time; skip internships already started
+   4. lib/filters.js     keep Canada, US and remote jobs
+   5. lib/dedupe.js      keep each job once across sources and the sheet
+   6. lib/scorer.js      score each job with reasons, pick the right CV
+   7. lib/sheets.js      write the best new matches to the sheet
+   8. lib/emailApply.js  find application emails in descriptions
+   9. approvals          send email applications, queue the rest
+  10. lib/mailer.js      follow-up reminders, and the digest once a day
+  11. lib/runs.js        record the run and how each source did
 
 Dashboard (app/page.js) reads and updates the same sheet.
 ```
@@ -119,7 +123,7 @@ fits no track stays below the minimum score of 55.
 ### Other
 
 `resumes/` holds your 3 CV PDFs. `cron/` holds the scripts that call `/api/run`
-daily. `logs/` holds the daily run log.
+on a schedule. `logs/` holds the run log.
 
 ## Settings (`.env.local`)
 
@@ -127,6 +131,7 @@ daily. `logs/` holds the daily run log.
 | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `GOOGLE_SERVICE_ACCOUNT_KEY_PATH`, `GOOGLE_SPREADSHEET_ID`, `GOOGLE_SHEET_TAB`          | Connect to your sheet.                                                     |
 | `SMTP_EMAIL`, `SMTP_APP_PASSWORD`, `SMTP_SERVER`, `SMTP_PORT`, `DIGEST_RECIPIENT_EMAIL` | Sending email. Gmail needs an App Password.                                |
+| `DIGEST_HOUR`                                                                           | The digest goes out once a day, on the first run at or after this hour. Default 8. |
 | `MINIMUM_MATCH_SCORE`                                                                   | Jobs below this never reach the sheet. Default 55.                         |
 | `AUTO_APPROVE_MIN_SCORE`                                                                | Jobs at or above this skip the Approve step. Default 80.                   |
 | `REQUIRE_REMOTE`                                                                        | `true` drops career-page jobs that don't look remote. Default false.       |
@@ -139,9 +144,9 @@ daily. `logs/` holds the daily run log.
 ## Setup on your PC
 
 ```bash
-pnpm install
+npm install
 cp .env.local.example .env.local     # then fill it in
-pnpm dev                             # open http://localhost:3000
+npm run dev                          # open http://localhost:3000
 ```
 
 Google setup: create a Google Cloud project, enable the Sheets and Drive APIs,
@@ -166,15 +171,15 @@ node scripts/check-companies.mjs --fix           # remove dead names
 node scripts/check-companies.mjs --add=greenhouse:dropbox,ashby:retool
 ```
 
-Restart `pnpm dev` after changing the list, because the fetchers read it at startup.
+Restart `npm run dev` after changing the list, because the fetchers read it at startup.
 
 ## Putting it on the VPS
 
-1. Install Node 20 and pnpm, upload the project, run `pnpm install` and
-   `pnpm build`.
+1. Install Node 20, upload the project, run `npm ci` and
+   `npm run build`.
 2. Fill in `.env.local` with Linux paths. Set `ALLOW_CLEAR=false` and set a
    dashboard login.
-3. Start it with PM2: `pm2 start "pnpm start" --name job-pipeline`, then
+3. Start it with PM2: `pm2 start "npm start" --name job-pipeline`, then
    `pm2 save` and `pm2 startup`.
 4. Fix Windows line endings in the scripts, then install the daily job:
    `sed -i 's/\r$//' cron/*.sh && chmod +x cron/*.sh && ./cron/setup_cron.sh`.

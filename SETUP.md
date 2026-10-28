@@ -1,6 +1,6 @@
 # Job Pipeline setup guide
 
-Job Pipeline searches about 10,000 job postings every morning, keeps the ones
+Job Pipeline searches about 10,000 job postings every few hours, keeps the ones
 that fit you, scores them, finds the salary, and puts the best 50 in your own
 Google Sheet. A dashboard on your computer lets you approve jobs, copy your
 application answers, and track what you applied to. An X tab gives you
@@ -114,14 +114,17 @@ powershell -ExecutionPolicy Bypass -File scripts\install-windows.ps1
 It installs everything and sets up two background jobs:
 
 - the dashboard, which starts whenever you log in, at http://localhost:3001
-- the job search, which runs every day at 8:00 AM. If your computer is
-  asleep it runs when it wakes. On Windows it also catches up later if the
-  PC was off.
+- the job search, which runs every 4 hours. If your computer is asleep it
+  runs when it wakes. If it was off, a Mac searches at login and Windows
+  catches up once the PC is back on.
 
-To use another port or time instead:
+The digest email still comes once a day, with the first search at or after
+8 AM. Change that time with `DIGEST_HOUR` in `.env.local`.
 
-- Mac: `PORT=3002 HOUR=7 ./scripts/install-mac.sh`
-- Windows: add `-Port 3002 -Hour 7` to the end of the installer command
+To use another port or search more or less often:
+
+- Mac: `PORT=3002 HOURS_BETWEEN_RUNS=6 ./scripts/install-mac.sh`
+- Windows: add `-Port 3002 -EveryHours 6` to the end of the installer command
 
 ### 4. Make a Google key
 
@@ -167,7 +170,7 @@ It walks you through the rest, one question at a time:
 3. sets up the sheet's columns and colours
 4. asks you to drag your resume PDF into the window
 5. opens your Apply kit so you can add your name, links and answers
-6. optionally connects Gmail for a daily digest email
+6. optionally connects Gmail for a daily digest email and to read your job-alert emails
 7. runs your first job search and opens your dashboard
 
 You can stop any time with Ctrl+C. Running `npm run setup` again picks up
@@ -194,6 +197,20 @@ has `titleKeywords` (a job title must contain one to count) and a
 to fit what you want, and give each one a summary under the same name in
 `config/applyKit.json`. An AI assistant can do this from your resume.
 
+### Email and job alerts (optional)
+
+Connecting Gmail in `npm run setup` gives you the daily digest and lets the
+app send email applications after you click Approve. It also lets the app read
+your LinkedIn and Indeed job-alert emails, so those jobs appear in your list
+automatically, without scraping LinkedIn.
+
+To use it, create the alerts yourself: on linkedin.com/jobs search for a role,
+turn on **Set alert**, and choose email. Indeed has the same option. The app
+only looks at mail from LinkedIn and Indeed alert senders. It opens your inbox
+read-only, so nothing is marked read, moved or deleted. Set
+`READ_JOB_ALERTS=false` in `.env.local` to turn it off. `npm run doctor` shows
+how many alert emails it can see.
+
 ## Daily use
 
 1. Open http://localhost:3001. Jobs are sorted by match score, with salary when it is known.
@@ -207,8 +224,9 @@ to fit what you want, and give each one a summary under the same name in
 
 ## Keeping it running
 
-- **Mac:** your Mac must be on for the 8 AM search. Asleep is fine: it runs when the Mac wakes. Shut down means that day is skipped.
-- **Windows:** the search wakes the PC if it is asleep, and runs later if the PC was off at 8 AM.
+- **Mac:** the search runs every 4 hours while your Mac is on. Asleep is fine: it runs when the Mac wakes. After a shutdown it runs at login.
+- **Windows:** the search wakes the PC if it is asleep, and runs once the PC is back on if it was off.
+- Jobs whose posting comes down from a company's own job board or Simplify are marked **Closed**. If the posting comes back, the job returns as Needs Manual Apply.
 - Once a month, run `npm run check-companies` to drop companies whose job boards moved.
 - To get updates from this repo: `git pull`, run the installer again (step 3), then `npm run doctor`. Your private files (`.env.local`, `credentials/`, your resume and `config/applyKit.json`) are never touched. If you edited `config/profile.json`, `config/companies.json` or `config/xSearches.json`, git may ask you to commit or stash your changes first.
 
@@ -222,7 +240,7 @@ npm run doctor
 ```
 
 - Dashboard won't load: check `logs/dashboard.log`.
-- No new jobs in the morning: check `logs/run.log`.
+- No new jobs for a while: check `logs/run.log`.
 - To stop everything: `./scripts/uninstall-mac.sh` on a Mac, or
   `powershell -ExecutionPolicy Bypass -File scripts\uninstall-windows.ps1` on Windows.
   Your files and sheet are kept.
