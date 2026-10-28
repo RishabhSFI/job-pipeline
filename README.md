@@ -1,10 +1,18 @@
 # Job Pipeline
 
-A Next.js app that finds entry-level finance, operations and AI-training jobs
-every day, keeps those in Canada, the US or remote, scores them against your
-profile, logs everything in a Google Sheet, and gives you a dashboard to
-approve and apply from. Runs on your PC for testing
-and on a RackNerd VPS for the daily run.
+A Next.js app that searches about 10,000 job postings every morning, keeps
+entry-level startup, operations, finance and AI-training roles in Canada, the
+US or remote, scores them against your profile, finds the salary, logs the
+best ones in your own Google Sheet, and gives you a dashboard to approve and
+apply from, plus one-click X searches for founders who are hiring.
+
+**To install it on your Mac, follow [SETUP.md](SETUP.md).** You can do it by
+hand or with an AI assistant such as Claude Code or Gemini (free for college
+students in 2026).
+
+Built on [Job Pipeline by Daniel Chimezie](https://github.com/0xDaniiel/Job-pipeline),
+retargeted from developer jobs to startup and business roles. The rest of
+this README describes how the code works.
 
 ## How it works
 

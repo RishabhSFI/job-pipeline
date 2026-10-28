@@ -1,4 +1,4 @@
-# Setting up Job Pipeline on your Mac
+# Job Pipeline setup guide
 
 Job Pipeline searches about 10,000 job postings every morning, keeps the ones
 that fit you, scores them, finds the salary, and puts the best 50 in your own
@@ -7,30 +7,69 @@ application answers, and track what you applied to. An X tab gives you
 one-click searches for founders posting roles on X.
 
 Everything runs on your own Mac with your own Google account. Nobody else
-sees your jobs, resume or answers.
+sees your jobs, resume or answers. It is free to run: the Google Sheets API
+costs nothing at this size, and every job source it reads is free.
 
-Setup takes about 30 minutes. You need a Mac, a Google account, and Node.js.
+You need:
 
-## 1. Install Node.js
+- a Mac (the installer is Mac only)
+- a personal Google account (school or work accounts often block step 4)
+- about 30 minutes
 
-Download the LTS version from https://nodejs.org and install it. To check it
-worked, open Terminal and run `node -v`. You need version 20 or newer.
+## The easy way: let an AI assistant set it up with you
 
-## 2. Get the code
+This project was set up and customized with an AI coding assistant, and you
+can do the same. The assistant runs the commands, explains each step, and
+tailors the job matching to your resume. Two options:
 
-Put the folder in `~/Projects`, not on your Desktop or in Documents or
-Downloads. macOS blocks background jobs from reading those folders.
+- **Claude Code** (https://claude.com/claude-code). This is what the project
+  was built with. It needs a paid Claude plan.
+- **Gemini**. Google gives college students a free year of its paid AI plan
+  in 2026: **Google AI Pro** for students in the US and **Google AI Plus** for
+  students in most other countries, including Canada. Claim it at
+  https://gemini.google/students with your student status verified through
+  SheerID. The offer must be claimed by **December 31, 2026**. Google's
+  **Gemini CLI**, which works in your Terminal like Claude Code, also has a
+  free tier with a personal Google account.
 
-If you were given a GitHub link:
+Open your assistant in Terminal, give it your resume, and paste this:
+
+> I want to set up Job Pipeline from https://github.com/RishabhSFI/job-pipeline
+> on my Mac. Clone it into ~/Projects/Job-pipeline, read SETUP.md, and do the
+> setup with me step by step. Run the installer, walk me through the Google
+> Cloud steps, and connect my Google Sheet. Then tailor config/profile.json,
+> config/companies.json and config/applyKit.json to my resume and the kind of
+> roles I want. Never paste the contents of credentials/keys.json or my
+> passwords into chat or into any file other than where SETUP.md says.
+
+You still click through the Google Cloud website yourself (step 4 below). The
+assistant can't do that for you, but it can tell you where you are stuck.
+
+## The manual way
+
+### 1. Install Node.js
+
+Download the **LTS** version from https://nodejs.org and install it. To check
+it worked, open Terminal and run:
+
+```bash
+node -v
+```
+
+You need version 20 or newer.
+
+### 2. Get the code
+
+Put the folder in `~/Projects`. Do **not** put it on your Desktop or in
+Documents or Downloads: macOS blocks background jobs from reading those
+folders, and the daily search would silently fail.
 
 ```bash
 mkdir -p ~/Projects && cd ~/Projects
-git clone <the link you were given> Job-pipeline
+git clone https://github.com/RishabhSFI/job-pipeline.git Job-pipeline
 ```
 
-If you were given a zip, unzip it and move the folder to `~/Projects/Job-pipeline`.
-
-## 3. Run the installer
+### 3. Run the installer
 
 ```bash
 cd ~/Projects/Job-pipeline
@@ -40,45 +79,69 @@ cd ~/Projects/Job-pipeline
 It installs everything and sets up two background jobs:
 
 - the dashboard, which starts whenever you log in, at http://localhost:3001
-- the job search, which runs every day at 8:00 AM (or when your Mac next wakes)
+- the job search, which runs every day at 8:00 AM (or as soon as your Mac wakes, if it was asleep)
 
-To use another port or time: `PORT=3002 HOUR=7 ./scripts/install-mac.sh`.
+To use another port or time instead: `PORT=3002 HOUR=7 ./scripts/install-mac.sh`.
 
-## 4. Connect your Google Sheet
+### 4. Connect your Google Sheet
 
-1. Go to https://console.cloud.google.com and create a project (any name).
-2. Search for **Google Sheets API** and click **Enable**. Do the same for **Google Drive API**.
-3. Go to **IAM & Admin → Service Accounts → Create service account**. Give it any name, click **Create and continue**, skip the role, click **Done**.
-4. Click the new account's email, open the **Keys** tab, then **Add key → Create new key → JSON**. A file downloads.
-5. Rename that file to `keys.json` and move it into `~/Projects/Job-pipeline/credentials/`. Never share this file.
-6. Create a blank Google Sheet. Click **Share** and add the service account's email (it ends in `iam.gserviceaccount.com`) as **Editor**.
-7. Copy the sheet ID from its URL. It is the long part between `/d/` and `/edit`. Open `.env.local` in the project folder and paste it after `GOOGLE_SPREADSHEET_ID=`.
-8. Format the sheet once:
+Google Cloud has a lot of menus. The fastest way through is the **search bar
+at the top of the page**: click it, type what the step says, and pick the
+matching result.
+
+1. Go to https://console.cloud.google.com and sign in with your personal Google account.
+2. Create a project. Click the project picker at the top left (next to the
+   Google Cloud logo), then **New project**. Any name works, for example
+   `job-pipeline`. Click **Create**, then make sure the new project is
+   selected in the project picker.
+3. In the search bar, type **Google Sheets API**. Open it and click **Enable**.
+4. In the search bar, type **Google Drive API**. Open it and click **Enable**.
+5. In the search bar, type **Service Accounts** and open it (it is under IAM & Admin).
+   Click **+ Create service account**. Give it any name, click **Create and
+   continue**, skip the optional role, and click **Done**.
+6. Click the email of the service account you just made. Open the **Keys**
+   tab, then **Add key → Create new key → JSON → Create**. A `.json` file
+   downloads.
+7. Rename that file to `keys.json` and move it into
+   `~/Projects/Job-pipeline/credentials/`. This file is a password: never
+   share it, post it, or paste it anywhere.
+8. Go to https://sheets.new to make a blank Google Sheet. Click **Share** and
+   add the service account's email (it ends in `iam.gserviceaccount.com`) as
+   **Editor**.
+9. Copy the sheet ID from the sheet's URL. It is the long part between
+   `/d/` and `/edit`. Open `.env.local` in the project folder and paste it
+   after `GOOGLE_SPREADSHEET_ID=`.
+10. Format the sheet once:
 
 ```bash
-cd ~/Projects/Job-pipeline
 curl -X POST http://localhost:3001/api/format
 ```
 
-Use a school or work Google account and step 4 may be blocked. Use a personal Gmail instead.
+If Google says **"Service account key creation is disabled"**, you are on a
+school or work account. Start again from step 1 with a personal Gmail.
 
-## 5. Make it yours
+If the dashboard says the **Google Sheets API has not been used in project**,
+you skipped step 3 or picked the wrong project in the project picker. Enable
+it and wait two minutes.
+
+### 5. Make it yours
 
 | What | Where |
 |---|---|
 | Your resume | Save it as `resumes/resume.pdf` |
 | Your name, links and saved answers | Replace every `EDIT ME` in `config/applyKit.json` |
 | The roles you want and the words that score them | `config/profile.json` |
-| Companies to watch | `config/companies.json`, then check them with `npm run check-companies` |
+| Companies to watch | `config/companies.json`, then run `npm run check-companies` |
 | X searches | `config/xSearches.json` |
 | Your name for application emails | The `YOUR_` lines in `.env.local` |
 
-`config/profile.json` comes tuned for startup generalist, operations, finance
-and AI-training roles at entry level in Canada and the US. Change the
-keywords to fit what you want. Each track has `titleKeywords` that decide
-whether a job is relevant at all.
+`config/profile.json` comes tuned for entry-level startup generalist,
+operations, finance and AI-training roles in Canada and the US. Each track
+has `titleKeywords` (a job title must contain one to count) and a
+`titleBonus` (how much that track is favoured). Change them to fit what you
+want, or ask your AI assistant to do it from your resume.
 
-## 6. Run your first search
+### 6. Run your first search
 
 ```bash
 cd ~/Projects/Job-pipeline
@@ -87,24 +150,34 @@ npm run pipeline
 
 It takes about a minute. Then open http://localhost:3001.
 
-## 7. Email (optional)
+### 7. Email (optional)
 
 For a daily digest email and sending email applications, add a Gmail address
-and a Gmail App Password to `.env.local` (`SMTP_EMAIL`, `SMTP_APP_PASSWORD`,
-`DIGEST_RECIPIENT_EMAIL`). Create the App Password at
-myaccount.google.com → Security → 2-Step Verification → App passwords.
-Nothing is ever emailed without your click unless you set `AUTO_SEND_EMAILS=true`.
+and a Gmail **App Password** to `.env.local` (`SMTP_EMAIL`,
+`SMTP_APP_PASSWORD`, `DIGEST_RECIPIENT_EMAIL`). To make the App Password, go
+to https://myaccount.google.com, type **App passwords** in its search bar,
+and create one (2-Step Verification must be on). Nothing is ever emailed
+without your click unless you set `AUTO_SEND_EMAILS=true`.
 
 ## Daily use
 
 1. Open http://localhost:3001. Jobs are sorted by match score, with salary when it is known.
-2. **Approve** the ones you want, or skip them.
-3. Open **Apply kit** to copy your details and answers and download your resume, then apply on the company's site.
+2. **Approve** the ones you want, or skip them. Approve never submits a
+   web application for you: it moves the job to Needs Manual Apply. Only
+   jobs that apply by email get sent, after you confirm.
+3. Open **Apply kit** to copy your details and answers and download your
+   resume, then apply on the company's site.
 4. Click **Mark Applied**. A follow-up reminder is set for 7 days later.
 5. Check the **X** tab for founders posting roles, and reply or DM them.
+
+## Keeping it running
+
+- Your Mac must be on for the 8 AM search. Asleep is fine: it runs when the Mac wakes. Shut down means that day is skipped.
+- Once a month, run `npm run check-companies` to drop companies whose job boards moved.
+- To get updates from this repo: `git pull`, then `./scripts/install-mac.sh` again. Your private files (`.env.local`, `credentials/`, your resume and `config/applyKit.json`) are never touched. If you edited `config/profile.json`, `config/companies.json` or `config/xSearches.json`, git may ask you to commit or stash your changes first.
 
 ## If something goes wrong
 
 - Dashboard won't load: check `logs/dashboard.log`.
-- No new jobs in the morning: check `logs/run.log`. Your Mac must be on (asleep is fine) for the daily run.
+- No new jobs in the morning: check `logs/run.log`.
 - To stop everything: `./scripts/uninstall-mac.sh`. Your files and sheet are kept.

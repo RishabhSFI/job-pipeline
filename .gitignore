@@ -26,3 +26,4 @@ znotes.md
 # your own details: never commit
 config/applyKit.json
 resumes/*.pdf
+.publish-blocklist
