@@ -6,6 +6,7 @@ import s from "../jobs.module.css";
 import Writing from "./Writing.js";
 import Outreach from "./Outreach.js";
 import { api, CopyButton } from "./ui.js";
+import FavouriteStar from "../../FavouriteStar.js";
 
 const STATUS_COLOR = {
   "Awaiting Your Approval": "var(--status-awaiting)",
@@ -96,7 +97,10 @@ export default function JobPage({ params }) {
       <Link href="/" className={s.back}>
         Back to jobs
       </Link>
-      <h1 className={s.title}>{job["Role Title"]}</h1>
+      <h1 className={s.title}>
+        <FavouriteStar job={job} />
+        {job["Role Title"]}
+      </h1>
       <p className={s.sub}>{job.Company}</p>
       <div className={s.meta}>
         <span className={s.pill} style={{ background: STATUS_COLOR[status] }}>

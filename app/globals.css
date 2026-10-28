@@ -617,3 +617,21 @@ a.actionBtn {
   align-items: center;
   justify-content: flex-end;
 }
+
+.favStar {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-faint);
+  vertical-align: middle;
+}
+.favStar:hover,
+.favStar:focus-visible {
+  color: var(--score);
+}
+.favStar.on {
+  color: #d99a00;
+}

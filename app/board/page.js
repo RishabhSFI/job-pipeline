@@ -10,6 +10,7 @@ import {
   isFollowUpDue,
 } from "../../lib/board.js";
 import styles from "./board.module.css";
+import FavouriteStar from "../FavouriteStar.js";
 
 const TRACKS = Object.entries(profile.tracks).map(([key, t]) => ({
   key,
@@ -61,6 +62,7 @@ function Card({ job, today, dragging, onDragStart, onDragEnd, onMove, onSaveNote
       onDragEnd={onDragEnd}
     >
       <div className={styles.cardTitle}>
+        <FavouriteStar job={job} />
         {job.id ? (
           <Link href={`/jobs/${job.id}`}>{job["Role Title"] || "Untitled role"}</Link>
         ) : (

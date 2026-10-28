@@ -16,6 +16,7 @@ import profile from "../config/profile.json";
 import countries from "../config/countries.json";
 import XSearches from "./XSearches.js";
 import FetchStatus from "./FetchStatus.js";
+import FavouriteStar, { isFavourite } from "./FavouriteStar.js";
 
 const STATUS_COLOR = {
   "Awaiting Your Approval": "var(--status-awaiting)",
@@ -45,6 +46,7 @@ const TRACK_KEYS = Object.keys(profile.tracks);
 
 const TABS = [
   { key: "all", label: "All", match: (s) => s !== "Closed" },
+  { key: "favourites", label: "★ Favourites", match: (s, job) => isFavourite(job) },
   {
     key: "awaiting",
     label: "Awaiting approval",
@@ -326,14 +328,14 @@ export default function Dashboard() {
   const counts = useMemo(() => {
     const c = {};
     for (const tab of TABS) {
-      c[tab.key] = jobs.filter((j) => tab.match(j.Status || "")).length;
+      c[tab.key] = jobs.filter((j) => tab.match(j.Status || "", j)).length;
     }
     return c;
   }, [jobs]);
 
   const inTab = useMemo(() => {
     const tab = TABS.find((t) => t.key === activeTab) || TABS[0];
-    return jobs.filter((j) => tab.match(j.Status || ""));
+    return jobs.filter((j) => tab.match(j.Status || "", j));
   }, [jobs, activeTab]);
 
   const visible = useMemo(() => {
@@ -396,6 +398,7 @@ export default function Dashboard() {
             onClick={() => setActiveTab(t.key)}
           >
             {t.label}
+            {t.key === "favourites" && counts.favourites ? ` (${counts.favourites})` : ""}
           </button>
         ))}
         <button
@@ -515,6 +518,16 @@ export default function Dashboard() {
               >
                 <div className="jobMain">
                   <p className="jobTitle">
+                    <FavouriteStar
+                      job={job}
+                      onChange={(j, on) =>
+                        setJobs((list) =>
+                          list.map((x) =>
+                            x._row === j._row ? { ...x, Favourite: on ? "★" : "" } : x,
+                          ),
+                        )
+                      }
+                    />
                     {job.id ? (
                       <Link href={`/jobs/${job.id}`}>
                         {job["Role Title"] || "Untitled role"}
