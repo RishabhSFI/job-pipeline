@@ -37,7 +37,12 @@ export default function OutreachPage() {
         {contacts.length} contacts. {outreach.usedToday} of {outreach.cap} emails sent today.
         {due.length > 0 && <span className={s.due}> {due.length} follow-up{due.length > 1 ? "s" : ""} due.</span>}
       </p>
-      {contacts.length === 0 && <p className={s.note}>No contacts yet. Open a job and add people in its Outreach section.</p>}
+      {contacts.length === 0 && (
+        <p className={s.note}>
+          No contacts yet. People you add from a job&apos;s Outreach section show up here, with when to follow up.{" "}
+          <Link href="/">Pick a job</Link>
+        </p>
+      )}
       {CONTACT_STATUS.map((st) => {
         const list = contacts
           .filter((c) => c.status === st)

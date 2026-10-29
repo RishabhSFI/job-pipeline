@@ -8,6 +8,8 @@ import {
   columnOfStatus,
   statusForDrop,
   isFollowUpDue,
+  statusLabel,
+  userNotes,
 } from "../../lib/board.js";
 import styles from "./board.module.css";
 import FavouriteStar from "../FavouriteStar.js";
@@ -77,7 +79,7 @@ function Card({ job, today, dragging, onDragStart, onDragEnd, onMove, onSaveNote
         {salary && salary !== "Not listed" && (
           <span className={styles.salary}>{salary}</span>
         )}
-        <span className={styles.status}>{job.Status}</span>
+        <span className={styles.status}>{statusLabel(job.Status)}</span>
       </div>
       {followUp && (
         <div className={due ? styles.followDue : styles.follow}>
@@ -107,7 +109,7 @@ function Card({ job, today, dragging, onDragStart, onDragEnd, onMove, onSaveNote
         </div>
       ) : (
         <button className={styles.notesBtn} onClick={startEdit}>
-          {notes ? <span className={styles.notesText}>{notes}</span> : "Add notes"}
+          {userNotes(notes) ? <span className={styles.notesText}>{userNotes(notes)}</span> : "Add notes"}
         </button>
       )}
 
@@ -271,7 +273,7 @@ export default function Board() {
               </option>
             ))}
           </select>
-          <button onClick={() => load(false)}>Refresh</button>
+          <button onClick={() => load(false)}>Reload sheet</button>
         </div>
       </div>
 
@@ -323,7 +325,7 @@ export default function Board() {
                   />
                 ))}
                 {byColumn[c.key].length === 0 && (
-                  <div className={styles.emptyCol}>Nothing here</div>
+                  <div className={styles.emptyCol}>No jobs here yet</div>
                 )}
               </div>
             </section>

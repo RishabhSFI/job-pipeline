@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
-import { linkedinLinks, schoolFromKit } from "../lib/linkedin.js";
 import {
   applyFilters,
   cleanFilters,
@@ -18,25 +17,19 @@ import XSearches from "./XSearches.js";
 import FetchStatus from "./FetchStatus.js";
 import FavouriteStar, { isFavourite } from "./FavouriteStar.js";
 import EligibilityTag from "./EligibilityTag.js";
+import { statusLabel } from "../lib/board.js";
 
-const STATUS_COLOR = {
-  "Awaiting Your Approval": "var(--status-awaiting)",
-  Approved: "var(--status-approved)",
-  Applied: "var(--status-applied)",
-  "Applied (Auto)": "var(--status-applied)",
-  "Needs Manual Apply": "var(--status-manual)",
-  Interview: "var(--status-interview)",
-  Offer: "var(--status-offer)",
-  Rejected: "var(--status-rejected)",
-  "No Response": "var(--status-none)",
-  "Follow-up Sent": "var(--status-approved)",
+// Only outcomes get a colour. Everything else is plain text.
+const STATUS_TONE = {
+  Applied: "good",
+  "Applied (Auto)": "good",
+  Interview: "good",
+  Offer: "good",
+  Rejected: "bad",
 };
 
 const CV_LABEL = Object.fromEntries(
-  Object.entries(profile.tracks).map(([key, t]) => [key, `${t.label} CV`]),
-);
-const ROLE_KEYWORDS = Object.values(profile.tracks).flatMap(
-  (t) => t.titleKeywords,
+  Object.entries(profile.tracks).map(([key, t]) => [key, `${t.label} resume`]),
 );
 const DEFAULT_CV_KEY =
   Object.keys(profile.tracks).find((k) => profile.tracks[k].isDefault) ||
@@ -46,7 +39,7 @@ const FILTERS_KEY = "jobFilters";
 const TRACK_KEYS = Object.keys(profile.tracks);
 
 const TABS = [
-  { key: "all", label: "All", match: (s) => s !== "Closed" && s !== "Not Eligible" },
+  { key: "all", label: "All", match: (s) => !["Closed", "Not Eligible", "Dismissed"].includes(s) },
   { key: "favourites", label: "★ Favourites", match: (s, job) => isFavourite(job) },
   {
     key: "awaiting",
@@ -55,13 +48,14 @@ const TABS = [
   },
   {
     key: "manual",
-    label: "Needs manual apply",
+    label: "Apply yourself",
     match: (s) => s === "Needs Manual Apply",
   },
   { key: "applied", label: "Applied", match: (s) => s.startsWith("Applied") },
   { key: "interview", label: "Interview", match: (s) => s === "Interview" },
   { key: "offer", label: "Offer", match: (s) => s === "Offer" },
   { key: "rejected", label: "Rejected", match: (s) => s === "Rejected" },
+  { key: "dismissed", label: "Dismissed", match: (s) => s === "Dismissed" },
   { key: "closed", label: "Closed", match: (s) => s === "Closed" },
   { key: "noteligible", label: "Not eligible", match: (s) => s === "Not Eligible" },
 ];
@@ -174,7 +168,7 @@ function KitPanel({ job, kit, copied, onCopy }) {
       {summary && (
         <>
           <div className="kitTitle">
-            Short summary ({CV_LABEL[cvKey] || "CV"})
+            Short summary ({CV_LABEL[cvKey] || "resume"})
           </div>
           <div className="answerRow">
             <div className="answerText">
@@ -192,7 +186,7 @@ function KitPanel({ job, kit, copied, onCopy }) {
 
       <div className="kitLinks">
         <a className="actionBtn primary" href={`/api/resume?cv=${cvKey}`}>
-          Download {CV_LABEL[cvKey] || "CV"}
+          Download {CV_LABEL[cvKey] || "resume"}
         </a>
         <a
           className="actionBtn"
@@ -217,7 +211,6 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
-  const school = useMemo(() => (kit ? schoolFromKit(kit.profile) : ""), [kit]);
 
   async function loadJobs() {
     setLoading(true);
@@ -300,7 +293,7 @@ export default function Dashboard() {
     if (
       email &&
       !window.confirm(
-        `This sends your CV to ${email} right now and cannot be undone. Continue?`,
+        `Email your application to ${email}? It goes out right away, with your resume attached, and can't be undone.`,
       )
     ) {
       return;
@@ -350,57 +343,24 @@ export default function Dashboard() {
   return (
     <div className="wrap">
       <div className="pageHead">
-        <div>
-          <h1 className="wordmark">Job Pipeline</h1>
-          <div className="tagline">Job application tracker</div>
-        </div>
+        <h1 className="pageTitle">Jobs</h1>
         <div className="headActions">
           <FetchStatus onDone={loadJobs} />
           <button className="ghostBtn" onClick={loadJobs}>
-            Refresh
+            Reload sheet
           </button>
-          <button className="ghostBtn danger" onClick={clearAll}>
-            Clear all
-          </button>
-        </div>
-      </div>
-
-      <div className="statRow">
-        <div className="stat">
-          <span className="statNumber">{counts.all || 0}</span>
-          <span className="statLabel">Total tracked</span>
-        </div>
-        <div className="stat">
-          <span className="statNumber">{counts.awaiting || 0}</span>
-          <span className="statLabel">Awaiting approval</span>
-        </div>
-        <div className="stat">
-          <span className="statNumber">{counts.manual || 0}</span>
-          <span className="statLabel">Needs manual apply</span>
-        </div>
-        <div className="stat">
-          <span className="statNumber">{counts.applied || 0}</span>
-          <span className="statLabel">Applied</span>
-        </div>
-        <div className="stat">
-          <span className="statNumber">{counts.interview || 0}</span>
-          <span className="statLabel">Interviews</span>
-        </div>
-        <div className="stat">
-          <span className="statNumber">{counts.offer || 0}</span>
-          <span className="statLabel">Offers</span>
         </div>
       </div>
 
       <div className="tabs">
-        {TABS.map((t) => (
+        {TABS.filter((t) => t.key === "all" || t.key === activeTab || counts[t.key]).map((t) => (
           <button
             key={t.key}
             className={`tab ${activeTab === t.key ? "active" : ""}`}
             onClick={() => setActiveTab(t.key)}
           >
             {t.label}
-            {(t.key === "favourites" || t.key === "noteligible") && counts[t.key] ? ` (${counts[t.key]})` : ""}
+            {counts[t.key] ? <span className="tabCount">{counts[t.key]}</span> : null}
           </button>
         ))}
         <button
@@ -474,7 +434,7 @@ export default function Dashboard() {
           />
         </div>
       )}
-      {activeTab !== "x" && !loading && (
+      {activeTab !== "x" && (!loading || jobs.length > 0) && (
         <div className="matchLine">
           {visible.length === inTab.length
             ? `${visible.length} ${visible.length === 1 ? "job" : "jobs"}`
@@ -493,7 +453,7 @@ export default function Dashboard() {
 
       {activeTab === "x" ? (
         <XSearches />
-      ) : loading ? (
+      ) : loading && jobs.length === 0 ? (
         <div className="loading">Loading jobs...</div>
       ) : visible.length === 0 ? (
         <div className="empty">
@@ -505,13 +465,6 @@ export default function Dashboard() {
         <div className="panel">
           {visible.map((job) => {
             const applyEmail = applyEmailOf(job);
-            const links = linkedinLinks(
-              job.Company,
-              job["Role Title"],
-              profile.linkedinSearches,
-              ROLE_KEYWORDS,
-              school,
-            );
             const kitOpen = openKit === job._row;
             return (
               <div
@@ -556,7 +509,7 @@ export default function Dashboard() {
                       <span className="location">{job["Country/Remote"]}</span>
                     )}
                     {job["Employment Type"] &&
-                      job["Employment Type"] !== "Not specified" && (
+                      !["Not specified", "N/A"].includes(job["Employment Type"]) && (
                         <span className="location">
                           {job["Employment Type"]}
                         </span>
@@ -580,13 +533,8 @@ export default function Dashboard() {
                           job["CV Version Used"]}
                       </span>
                     )}
-                    <span
-                      className="statusPill"
-                      style={{
-                        color: STATUS_COLOR[job.Status] || "var(--status-none)",
-                      }}
-                    >
-                      {job.Status}
+                    <span className={`statusText ${STATUS_TONE[job.Status] || ""}`}>
+                      {statusLabel(job.Status)}
                     </span>
                   </div>
                   {applyEmail && (
@@ -594,18 +542,6 @@ export default function Dashboard() {
                       Applies by email to {applyEmail}
                     </div>
                   )}
-                  <div className="liLinks">
-                    {links.map((l) => (
-                      <a
-                        key={l.label}
-                        href={l.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {l.label}
-                      </a>
-                    ))}
-                  </div>
                   {kitOpen && kit && (
                     <KitPanel
                       job={job}
@@ -623,12 +559,12 @@ export default function Dashboard() {
                         disabled={busyRow === job._row}
                         onClick={() => approve(job)}
                       >
-                        Approve
+                        {applyEmail ? "Email application" : "Approve"}
                       </button>
                       <button
                         className="actionBtn"
                         disabled={busyRow === job._row}
-                        onClick={() => updateStatus(job._row, "Rejected")}
+                        onClick={() => updateStatus(job._row, "Dismissed")}
                       >
                         Dismiss
                       </button>
@@ -676,6 +612,13 @@ export default function Dashboard() {
               </div>
             );
           })}
+        </div>
+      )}
+      {activeTab !== "x" && jobs.length > 0 && (
+        <div className="pageFoot">
+          <button className="linkBtn danger" onClick={clearAll}>
+            Delete every job from the sheet
+          </button>
         </div>
       )}
     </div>

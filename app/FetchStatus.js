@@ -75,7 +75,7 @@ export default function FetchStatus({ onDone }) {
       <div className="fetchInfo">
         {loaded && (
           <span>
-            {last ? `Last fetched ${timeAgo(last.at)}` : "Not fetched yet"}
+            {last ? `Last searched ${timeAgo(last.at)}` : "No search yet"}
           </span>
         )}
         {failing.length > 0 && (
@@ -90,7 +90,7 @@ export default function FetchStatus({ onDone }) {
         )}
       </div>
       <button className="ghostBtn primaryGhost" disabled={busy} onClick={fetchNow}>
-        {busy ? "Searching… about a minute" : "Fetch now"}
+        {busy ? "Searching… about a minute" : "Search now"}
       </button>
       {message && !busy && (
         <div className="fetchMessage" role="status">

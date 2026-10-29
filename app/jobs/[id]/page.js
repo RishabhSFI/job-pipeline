@@ -8,17 +8,7 @@ import Outreach from "./Outreach.js";
 import { api, CopyButton } from "./ui.js";
 import FavouriteStar from "../../FavouriteStar.js";
 import Requirements from "./Requirements.js";
-
-const STATUS_COLOR = {
-  "Awaiting Your Approval": "var(--status-awaiting)",
-  Approved: "var(--status-approved)",
-  Applied: "var(--status-applied)",
-  "Applied (Auto)": "var(--status-applied)",
-  "Needs Manual Apply": "var(--status-manual)",
-  Interview: "var(--status-interview)",
-  Offer: "var(--status-applied)",
-  Rejected: "var(--status-rejected)",
-};
+import { statusLabel } from "../../../lib/board.js";
 
 function host(link) {
   try {
@@ -104,15 +94,15 @@ export default function JobPage({ params }) {
       </h1>
       <p className={s.sub}>{job.Company}</p>
       <div className={s.meta}>
-        <span className={s.pill} style={{ background: STATUS_COLOR[status] }}>
-          {status}
-        </span>
+        <span className={s.status}>{statusLabel(status)}</span>
         {job["Country/Remote"] && <span>{job["Country/Remote"]}</span>}
-        {(job["Est. Salary"] || posting.salary) && <span><b>{job["Est. Salary"] || posting.salary}</b></span>}
+        {[job["Est. Salary"], posting.salary].find((v) => v && v !== "Not listed") && (
+          <b>{[job["Est. Salary"], posting.salary].find((v) => v && v !== "Not listed")}</b>
+        )}
         <span>
           Match <span className={s.score}>{job["Match Score"]}</span>
         </span>
-        {track.label && <span>{track.label} CV</span>}
+        {track.label && <span>{track.label} resume</span>}
         {job["Posted Date"] ? <span>Posted {job["Posted Date"]}</span> : job["Date Found"] && <span>Found {job["Date Found"]}</span>}
         {job.Link && (
           <a href={job.Link} target="_blank" rel="noreferrer">
@@ -137,7 +127,7 @@ export default function JobPage({ params }) {
           </Link>
           {["Interview", "Offer", "Rejected"].map((st) => (
             <button key={st} className={s.ghost} disabled={busy || status === st} onClick={() => setStatus(st)}>
-              {st === "Rejected" ? "Rejected" : `Mark ${st.toLowerCase()}`}
+              {`Mark ${st.toLowerCase()}`}
             </button>
           ))}
         </div>

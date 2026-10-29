@@ -6,6 +6,8 @@ import {
   columnOfStatus,
   statusForDrop,
   isFollowUpDue,
+  statusLabel,
+  userNotes,
 } from "../lib/board.js";
 
 test("every STATUS lands in exactly one column", () => {
@@ -49,4 +51,23 @@ test("follow-up is due today or earlier only", () => {
   assert.equal(isFollowUpDue("2026-10-01", now), true);
   assert.equal(isFollowUpDue("2026-10-29", now), false);
   assert.equal(isFollowUpDue("", now), false);
+});
+
+test("dismissed jobs sit in Closed and stay put when dropped there", () => {
+  assert.equal(columnOfStatus("Dismissed").key, "closed");
+  assert.equal(statusForDrop("Dismissed", "closed"), "Dismissed");
+});
+
+test("statuses read in sentence case on screen", () => {
+  assert.equal(statusLabel("Needs Manual Apply"), "Apply yourself");
+  assert.equal(statusLabel("Awaiting Your Approval"), "Awaiting approval");
+  assert.equal(statusLabel("Interview"), "Interview");
+  assert.equal(statusLabel(""), "");
+});
+
+test("cards hide the search's own notes and keep yours", () => {
+  assert.equal(userNotes("Auto-approved (score 100)"), "");
+  assert.equal(userNotes("Auto-approved (score 88). Apply by email: a@b.co"), "Apply by email: a@b.co");
+  assert.equal(userNotes("Met Sam at the info session"), "Met Sam at the info session");
+  assert.equal(userNotes(""), "");
 });

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { checkEligibility, eligibilityCell, yearsAsked, graduationYears } from "../lib/eligibility.js";
+import { eligibilityChanges } from "../lib/eligibilityRun.js";
 
 const canadian = {
   workIn: ["Canada"],
@@ -99,4 +100,10 @@ test("re-checking the sheet hides open jobs you can't take and brings back ones 
   assert.deepEqual(statuses.map((s) => [s.row, s.status]), [[2, "Not Eligible"], [4, "Awaiting Your Approval"]]);
   assert.deepEqual(cells.map((c) => c.row), [2, 4]);
   assert.equal(cells[1].value, "");
+});
+
+test("a re-check never touches a job you dismissed", () => {
+  const rows = [{ _row: 2, Link: "https://x.test/1", Status: "Dismissed", "Role Title": "MBA Intern" }];
+  const out = eligibilityChanges(rows, { postingFor: () => null, facts: { workIn: ["Canada"], graduation: "2027-05" } });
+  assert.deepEqual(out, { cells: [], statuses: [] });
 });
