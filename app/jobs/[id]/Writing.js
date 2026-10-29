@@ -24,7 +24,7 @@ function Draft({ id, kind, initial }) {
     if (r.ok) {
       setText(r.text);
       setSaved(true);
-    } else setErr(r.error || "Something went wrong.");
+    } else setErr(r.error || "The draft failed. Try again.");
   }
   async function save() {
     const r = await api(`/api/jobs/${id}/drafts`, "PUT", { [kind.key]: text });
@@ -71,7 +71,7 @@ export default function Writing({ id, drafts, aiAvailable }) {
         {!aiAvailable && (
           <>
             {" "}
-            AI isn&apos;t set up yet: get a free key at{" "}
+            AI isn&apos;t set up yet. Get a free key at{" "}
             <a href="https://aistudio.google.com" target="_blank" rel="noreferrer">
               aistudio.google.com
             </a>{" "}

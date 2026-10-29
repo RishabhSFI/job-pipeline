@@ -1,5 +1,5 @@
 {
-  "_comment": "Saved X searches for the dashboard's X tab. Each one opens live X results in a new browser tab; nothing is scraped. Edit, add or remove searches freely; the query uses X's own search syntax (OR, quotes, -filter:replies, lang:en). Refresh the dashboard to see changes.",
+  "_comment": "Saved X searches for the dashboard's X tab. Each one opens live X results in a new browser tab. The app scrapes nothing. Edit, add or remove searches. The query uses X's own search syntax (OR, quotes, -filter:replies, lang:en). Refresh the dashboard to see changes.",
   "always": "-filter:replies lang:en",
   "popularMinLikes": 10,
   "searches": [
@@ -40,7 +40,7 @@
     },
     {
       "label": "Toronto startups",
-      "why": "Close to home: Toronto founders hiring for ops and strategy.",
+      "why": "Toronto founders hiring for ops and strategy.",
       "query": "Toronto (\"hiring\" OR \"looking for\") (startup OR founder) (ops OR operations OR generalist OR strategy OR \"chief of staff\" OR growth)"
     },
     {

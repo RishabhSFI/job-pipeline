@@ -41,7 +41,7 @@ test("a US job without sponsorship is flagged for a TN check, not hidden", () =>
 test("a US job that says nothing about visas is fine, with a quiet note", () => {
   const r = checkEligibility(job("Strategy Associate", { location: "New York, NY" }), canadian);
   assert.equal(r.verdict, "ok");
-  assert.equal(eligibilityCell(r), "Note: US: TN visa");
+  assert.equal(eligibilityCell(r), "Note: US job, needs a TN visa");
 });
 
 test("jobs open to Canada are not affected by US rules", () => {

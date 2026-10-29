@@ -163,7 +163,7 @@ function Bullet({ bullet, baseText, index, count, where, changed, edit, reword, 
             </p>
           ) : (
             <>
-              <div className={s.muted}>Pick a rewrite, or keep yours:</div>
+              <div className={s.muted}>Pick a rewrite, or keep yours.</div>
               {mine.options.map((opt) => (
                 <div key={opt} className={s.option}>
                   <div>{opt}</div>
@@ -204,8 +204,8 @@ export default function Editor({ resume, baseTexts, onSaveWording, onRemoveWordi
           </button>
         </div>
         <p className={s.hint}>
-          Presets start from your base resume (not your current edits): bullets tagged for the track go first and on, the rest
-          off. Changed pieces are marked <span className={s.dot}>●</span>
+          A preset starts from your base resume, not your current edits. It turns on the bullets tagged for that track,
+          moves them to the top and turns the rest off. A <span className={s.dot}>●</span> marks each change
           {changed.size ? ` (${changed.size} now).` : "."}
         </p>
       </div>

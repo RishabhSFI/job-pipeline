@@ -15,8 +15,8 @@ export default function XSearches() {
       <p className="xIntro">
         Hiring posts on X, one click each. Latest shows everything newest
         first. Popular only shows posts with {config.popularMinLikes}+ likes,
-        which cuts the spam. When a founder posts a role, reply or DM them
-        directly: that is the point of finding it on X.
+        which cuts the spam. When a founder posts a role, reply to the post or
+        DM them.
       </p>
       <div className="panel">
         {config.searches.map((s) => (

@@ -5,7 +5,7 @@ import { clearAllJobs } from "../../../lib/sheets.js";
 export async function POST() {
   if (process.env.ALLOW_CLEAR !== "true") {
     return NextResponse.json(
-      { error: "Clearing is disabled. Set ALLOW_CLEAR=true in .env.local." },
+      { error: "Clear all is off. Set ALLOW_CLEAR=true in .env.local to turn it on." },
       { status: 403 },
     );
   }

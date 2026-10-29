@@ -14,14 +14,14 @@ import {
 export async function GET(request) {
   const cv = new URL(request.url).searchParams.get("cv") || DEFAULT_TRACK;
   if (!isTrackKey(cv)) {
-    return NextResponse.json({ error: "Unknown CV" }, { status: 400 });
+    return NextResponse.json({ error: "No track by that name." }, { status: 400 });
   }
   const fileName = resumeFileFor(cv);
 
   const filePath = path.join(process.cwd(), "resumes", fileName);
   if (!fs.existsSync(filePath)) {
     return NextResponse.json(
-      { error: "Resume file not found" },
+      { error: "No resume PDF saved for this track. Run npm run setup to add one." },
       { status: 404 },
     );
   }

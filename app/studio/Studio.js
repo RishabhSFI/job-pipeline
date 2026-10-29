@@ -235,7 +235,7 @@ export default function Studio() {
   const onFit = useCallback((f) => setFit(f), []);
 
   function chooseTrack(trackKey) {
-    if (changed.size && !confirm("Start over from your base resume for this track? Your current edits will be replaced.")) return;
+    if (changed.size && !confirm("This track starts from your base resume and replaces your current edits. Continue?")) return;
     setTrack(trackKey);
     setResume(trackKey ? applyTrack(base, trackKey) : base);
   }
@@ -294,7 +294,7 @@ export default function Studio() {
   }
 
   async function makeBase() {
-    if (!confirm("Replace your base resume with these edits? Every new version and track preset will start from it.")) return;
+    if (!confirm("Replace your base resume with these edits? New versions and track presets start from it.")) return;
     try {
       const data = await api("/api/studio/base", send("PUT", { resume }));
       setBase(data.base);
@@ -384,7 +384,7 @@ export default function Studio() {
           <h1 className={s.title}>Resume Studio</h1>
           <p className={s.muted}>
             {currentVersion ? `Editing "${currentVersion.savedAs}"` : "Tailor your base resume to one job."}
-            {dirty ? " · Unsaved changes, autosaved" : ""}
+            {dirty ? " · Not saved as a version yet (kept as a draft)" : ""}
           </p>
         </div>
         <div className={s.headActions}>

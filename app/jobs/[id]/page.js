@@ -113,7 +113,7 @@ export default function JobPage({ params }) {
           Match <span className={s.score}>{job["Match Score"]}</span>
         </span>
         {track.label && <span>{track.label} CV</span>}
-        {job["Date Found"] && <span>Posted {job["Date Found"]}</span>}
+        {job["Posted Date"] ? <span>Posted {job["Posted Date"]}</span> : job["Date Found"] && <span>Found {job["Date Found"]}</span>}
         {job.Link && (
           <a href={job.Link} target="_blank" rel="noreferrer">
             {host(job.Link)}
@@ -160,11 +160,11 @@ export default function JobPage({ params }) {
         <h2>Posting</h2>
         {posting.text ? (
           <>
-            {posting.live && <p className={s.note}>Not saved with this job, so this was fetched live from the posting page and may be incomplete.</p>}
+            {posting.live && <p className={s.note}>This job has no saved copy of the posting, so this text comes from the posting page now and may be cut off.</p>}
             <div className={s.posting}>{posting.text}</div>
           </>
         ) : (
-          <p className={s.note}>No posting text available. Open the application link to read it.</p>
+          <p className={s.note}>No posting text saved. Open the application link to read it.</p>
         )}
       </section>
 

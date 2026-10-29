@@ -67,7 +67,7 @@ export default function Requirements({ id, eligibility, aiAvailable }) {
               </li>
             ))}
           </ul>
-          <p className={s.note}>Checked {new Date(check.checkedAt).toLocaleString()}. AI can misread; skim the posting too.</p>
+          <p className={s.note}>Checked {new Date(check.checkedAt).toLocaleString()}. The AI can misread a posting, so read it too.</p>
         </div>
       )}
     </section>

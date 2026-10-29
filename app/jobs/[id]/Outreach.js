@@ -18,7 +18,7 @@ function Guesses({ name, domain, onPick }) {
       </div>
       {list.length > 0 && (
         <>
-          <p className={s.warn}>Guess - verify before sending. These are common formats, not confirmed addresses.</p>
+          <p className={s.warn}>These are guesses from common email formats. Check one before you send to it.</p>
           <div className={s.guess}>
             {list.map((g) => (
               <button key={g.email} type="button" className={s.ghost} onClick={() => onPick(g.email)} title={g.pattern}>
@@ -117,13 +117,13 @@ function EmailBlock({ contact, field, kind, title, draftLabel, outreach, patch, 
               Open in Gmail
             </a>
             <a className={s.ghost} href={mailtoUrl(url)}>
-              mailto
+              Open in mail app
             </a>
             <button className={s.btn} disabled={!outreach.smtp.configured || noEmail || !d.body} onClick={() => setDialog(true)}>
               Send…
             </button>
           </div>
-          {!outreach.smtp.configured && <p className={s.note}>Send is off: {outreach.smtp.reason}</p>}
+          {!outreach.smtp.configured && <p className={s.note}>Sending is off. {outreach.smtp.reason}</p>}
           {outreach.smtp.configured && noEmail && <p className={s.note}>Add an email address to send.</p>}
         </>
       )}
@@ -184,7 +184,7 @@ export function ContactCard({ initial, domain, outreach, ai, onChange, onDelete 
         </span>
       </div>
       <div className={s.form}>
-        {field("title", "Their role / title")}
+        {field("title", "Their title")}
         <select className={s.select} value={c.relationship || "Other"} onChange={(e) => save({ relationship: e.target.value })}>
           {RELATIONSHIPS.map((r) => (
             <option key={r}>{r}</option>
@@ -192,7 +192,7 @@ export function ContactCard({ initial, domain, outreach, ai, onChange, onDelete 
         </select>
         <div>
           {field("email", "Email")}
-          {c.emailIsGuess && c.email && <p className={s.warn}>Guess - verify before sending.</p>}
+          {c.emailIsGuess && c.email && <p className={s.warn}>This address is a guess. Check it before you send.</p>}
         </div>
         {field("linkedinUrl", "LinkedIn URL")}
         <div className={s.wide}>{field("notes", "Notes (how you know them, what you have in common)")}</div>
@@ -290,7 +290,7 @@ export default function Outreach({ jobId, job, initialContacts, linkedin, domain
   return (
     <section className={s.card}>
       <h2>Outreach</h2>
-      <p className={s.note}>People who can help you get this role. Find them on LinkedIn, add them here, then draft a short note. Nothing is ever sent without your confirmation. {outreach.usedToday} of {outreach.cap} sends used today.</p>
+      <p className={s.note}>People who can help you get this role. Find them on LinkedIn, add them here, then draft a short note. The app sends nothing until you confirm. {outreach.usedToday} of {outreach.cap} sends used today.</p>
       <div className={s.links}>
         {linkedin.map((l) => (
           <a key={l.label} className={s.ghost} href={l.url} target="_blank" rel="noreferrer">
@@ -320,7 +320,7 @@ export default function Outreach({ jobId, job, initialContacts, linkedin, domain
         <div>
           <div className={s.form}>
             <input className={s.input} placeholder="Name" value={form.name} onChange={set("name")} />
-            <input className={s.input} placeholder="Their role / title" value={form.title} onChange={set("title")} />
+            <input className={s.input} placeholder="Their title" value={form.title} onChange={set("title")} />
             <select className={s.select} value={form.relationship} onChange={set("relationship")}>
               {RELATIONSHIPS.map((r) => (
                 <option key={r}>{r}</option>
@@ -333,8 +333,8 @@ export default function Outreach({ jobId, job, initialContacts, linkedin, domain
           {form.name && (
             <Guesses name={form.name} domain={domain?.domain} onPick={(email) => setForm({ ...form, email, emailIsGuess: true })} />
           )}
-          {domain?.domain && domain.source.includes("guess") && <p className={s.note}>Domain guessed from the company name; correct it if needed.</p>}
-          {form.emailIsGuess && <p className={s.warn}>Email set from a guess - verify before sending.</p>}
+          {domain?.domain && domain.source.includes("guess") && <p className={s.note}>The app guessed this domain from the company name. Fix it if it's wrong.</p>}
+          {form.emailIsGuess && <p className={s.warn}>This email is a guess. Check it before you send.</p>}
           {err && <p className={s.error}>{err}</p>}
           <div className={s.row}>
             <button className={s.btn} disabled={!form.name.trim()} onClick={add}>

@@ -123,7 +123,7 @@ function ScoreTag({ job }) {
               ))}
             </ul>
           ) : (
-            <p>The reasons appear for jobs found after this update.</p>
+            <p>No reasons saved. Jobs found from now on show them.</p>
           )}
         </div>
       )}
@@ -308,7 +308,7 @@ export default function Dashboard() {
     const data = await updateStatus(job._row, "Approved");
     if (email && data && data.sent === false) {
       window.alert(
-        "The email could not be sent. The job stays Approved and the next run will retry. Check the email settings in .env.local.",
+        "The email didn't send. The job stays Approved and the next run tries again. Check the email settings in .env.local.",
       );
     }
   }
@@ -499,7 +499,7 @@ export default function Dashboard() {
         <div className="empty">
           {filtersActive
             ? "No jobs match these filters."
-            : "Nothing here yet. The next daily run will add new matches."}
+            : "Nothing here yet. The next search adds new matches."}
         </div>
       ) : (
         <div className="panel">
@@ -640,7 +640,7 @@ export default function Dashboard() {
                       disabled={busyRow === job._row}
                       onClick={() => updateStatus(job._row, "Applied")}
                     >
-                      Mark Applied
+                      Mark applied
                     </button>
                   )}
                   {(job.Status === "Applied" ||
@@ -650,7 +650,7 @@ export default function Dashboard() {
                       disabled={busyRow === job._row}
                       onClick={() => updateStatus(job._row, "Interview")}
                     >
-                      Got Interview
+                      Got an interview
                     </button>
                   )}
                   {(job.Status === "Applied" ||
@@ -661,7 +661,7 @@ export default function Dashboard() {
                       disabled={busyRow === job._row}
                       onClick={() => updateStatus(job._row, "Offer")}
                     >
-                      Got Offer
+                      Got an offer
                     </button>
                   )}
                   {KIT_STATUSES.includes(job.Status) && (
