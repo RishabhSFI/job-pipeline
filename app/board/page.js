@@ -11,13 +11,21 @@ import {
   statusLabel,
   userNotes,
 } from "../../lib/board.js";
+import { activeFilterCount, applyFilters, cleanFilters, sortJobs, DEFAULT_FILTERS } from "../../lib/jobFilters.js";
+import countries from "../../config/countries.json";
 import styles from "./board.module.css";
 import FavouriteStar from "../FavouriteStar.js";
+import FilterPanel from "../FilterPanel.js";
 
-const TRACKS = Object.entries(profile.tracks).map(([key, t]) => ({
-  key,
-  label: t.label,
-}));
+const FILTERS_KEY = "boardFilters";
+const TRACK_KEYS = Object.keys(profile.tracks);
+const COLUMN_KEYS = BOARD_COLUMNS.map((c) => c.key);
+
+// The open section lives in the URL (?col=saved), so Back and links work.
+function readOpenColumn() {
+  const col = new URLSearchParams(window.location.search).get("col");
+  return COLUMN_KEYS.includes(col) ? col : "";
+}
 const EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
 
 function Card({ job, today, dragging, onDragStart, onDragEnd, onMove, onSaveNotes }) {
@@ -145,8 +153,9 @@ export default function Board() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
-  const [track, setTrack] = useState("");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+  const [open, setOpen] = useState("");
   const [dragRow, setDragRow] = useState(null);
   const [overCol, setOverCol] = useState(null);
   const today = useRef(new Date()).current;
@@ -167,7 +176,33 @@ export default function Board() {
 
   useEffect(() => {
     load(false);
+    setOpen(readOpenColumn());
+    try {
+      setFilters(cleanFilters(JSON.parse(localStorage.getItem(FILTERS_KEY) || "null"), TRACK_KEYS));
+    } catch {
+      // storage unavailable: start from the defaults
+    }
+    setFiltersLoaded(true);
+    const onBack = () => setOpen(readOpenColumn());
+    window.addEventListener("popstate", onBack);
+    return () => window.removeEventListener("popstate", onBack);
   }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) return;
+    try {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+    } catch {
+      // private window: filters just won't be remembered
+    }
+  }, [filters, filtersLoaded]);
+
+  function openColumn(key) {
+    setOpen(key);
+    const url = key ? `?col=${key}` : window.location.pathname;
+    window.history.pushState(null, "", url);
+    window.scrollTo(0, 0);
+  }
 
   function patchJob(row, patch) {
     setJobs((list) => list.map((j) => (j._row === row ? { ...j, ...patch } : j)));
@@ -220,27 +255,36 @@ export default function Board() {
     }
   }
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return jobs.filter((j) => {
-      // Not-eligible jobs aren't part of the pipeline. The Jobs list keeps them.
-      if (j.Status === "Not Eligible") return false;
-      if (track && j["CV Version Used"] !== track) return false;
-      if (!q) return true;
-      return `${j["Role Title"]} ${j.Company}`.toLowerCase().includes(q);
-    });
-  }, [jobs, search, track]);
+  // Not-eligible jobs aren't part of the pipeline. The Jobs list keeps them.
+  const pipeline = useMemo(() => jobs.filter((j) => j.Status !== "Not Eligible"), [jobs]);
+  const inOpen = useMemo(
+    () => (open ? pipeline.filter((j) => columnOfStatus(j.Status || "").key === open) : pipeline),
+    [pipeline, open],
+  );
 
   const byColumn = useMemo(() => {
+    const shown = sortJobs(applyFilters(pipeline, filters, { regions: countries.regions }), filters.sort);
     const map = Object.fromEntries(BOARD_COLUMNS.map((c) => [c.key, []]));
-    for (const j of filtered) map[columnOfStatus(j.Status || "").key].push(j);
-    for (const list of Object.values(map)) {
-      list.sort(
-        (a, b) => Number(b["Match Score"] || 0) - Number(a["Match Score"] || 0),
-      );
-    }
+    for (const j of shown) map[columnOfStatus(j.Status || "").key].push(j);
     return map;
-  }, [filtered]);
+  }, [pipeline, filters]);
+
+  const card = (job) => (
+    <Card
+      key={job._row}
+      job={job}
+      today={today}
+      dragging={dragRow === job._row}
+      onDragStart={setDragRow}
+      onDragEnd={() => {
+        setDragRow(null);
+        setOverCol(null);
+      }}
+      onMove={moveTo}
+      onSaveNotes={saveNotes}
+    />
+  );
+  const openCol = BOARD_COLUMNS.find((c) => c.key === open);
 
   function onDrop(e, columnKey) {
     e.preventDefault();
@@ -254,30 +298,34 @@ export default function Board() {
   return (
     <div className={styles.page}>
       <div className={styles.head}>
-        <h1 className={styles.title}>Pipeline board</h1>
-        <div className={styles.filters}>
-          <input
-            type="search"
-            placeholder="Search role or company"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search role or company"
-          />
-          <select
-            value={track}
-            onChange={(e) => setTrack(e.target.value)}
-            aria-label="Filter by track"
-          >
-            <option value="">All tracks</option>
-            {TRACKS.map((t) => (
-              <option key={t.key} value={t.key}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <button onClick={() => load(false)}>Reload sheet</button>
-        </div>
+        <h1 className={styles.title}>{openCol ? openCol.label : "Pipeline board"}</h1>
+        <button className={styles.reload} onClick={() => load(false)}>
+          Reload sheet
+        </button>
       </div>
+
+      <nav className={styles.switcher} aria-label="Board sections">
+        {[{ key: "", label: "All sections" }, ...BOARD_COLUMNS].map((c) => (
+          <button
+            key={c.key || "all"}
+            type="button"
+            className={`${styles.switch} ${open === c.key ? styles.switchOn : ""}`}
+            aria-current={open === c.key ? "page" : undefined}
+            onClick={() => openColumn(c.key)}
+          >
+            {c.label}
+            {c.key && <span className={styles.switchCount}>{byColumn[c.key]?.length ?? 0}</span>}
+          </button>
+        ))}
+      </nav>
+
+      <FilterPanel
+        jobs={inOpen}
+        filters={filters}
+        setFilters={setFilters}
+        tracks={profile.tracks}
+        regions={countries.regions}
+      />
 
       {error && (
         <div className={styles.error} role="alert">
@@ -289,6 +337,17 @@ export default function Board() {
 
       {loading ? (
         <div className={styles.empty}>Loading jobs...</div>
+      ) : openCol ? (
+        <div className={styles.grid}>
+          {byColumn[open].map(card)}
+          {byColumn[open].length === 0 && (
+            <div className={styles.emptyCol}>
+              {!activeFilterCount(filters) && !filters.search
+                ? "No jobs here yet"
+                : "No jobs here match these filters"}
+            </div>
+          )}
+        </div>
       ) : (
         <div className={styles.board}>
           {BOARD_COLUMNS.map((c) => (
@@ -307,25 +366,13 @@ export default function Board() {
               aria-label={c.label}
             >
               <header className={styles.colHead}>
-                <span>{c.label}</span>
+                <button type="button" className={styles.colOpen} onClick={() => openColumn(c.key)}>
+                  {c.label}
+                </button>
                 <span className={styles.count}>{byColumn[c.key].length}</span>
               </header>
               <div className={styles.cards}>
-                {byColumn[c.key].map((job) => (
-                  <Card
-                    key={job._row}
-                    job={job}
-                    today={today}
-                    dragging={dragRow === job._row}
-                    onDragStart={setDragRow}
-                    onDragEnd={() => {
-                      setDragRow(null);
-                      setOverCol(null);
-                    }}
-                    onMove={moveTo}
-                    onSaveNotes={saveNotes}
-                  />
-                ))}
+                {byColumn[c.key].map(card)}
                 {byColumn[c.key].length === 0 && (
                   <div className={styles.emptyCol}>No jobs here yet</div>
                 )}
