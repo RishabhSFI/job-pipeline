@@ -1,22 +1,24 @@
 /* Tokens. DESIGN.md explains each decision; change them here, not in components. */
 :root {
-  /* One accent (navy) and warm neutrals that carry most of the UI */
-  --color-accent: #1f2a54;
-  --color-accent-hover: #2b3a73;
-  --color-accent-contrast: #ffffff;
-  --color-bg: #f6f3ee;
-  --color-surface: #ffffff;
-  --color-surface-hover: #fbfaf7;
-  --color-border: #e4dfd6;
-  --color-lane: #ece8e0;
-  --color-text: #1b2033;
-  --color-text-muted: #5e5a52;
-  --color-text-faint: #8a857b;
+  /* Dark: near-black surfaces, one amber accent */
+  color-scheme: dark;
+  --color-accent: #f5a524;
+  --color-accent-hover: #ffb84d;
+  --color-accent-contrast: #1a1200;
+  --color-bg: #0e0f11;
+  --color-surface: #16171a;
+  --color-surface-hover: #1b1c20;
+  --color-border: #26272c;
+  --color-lane: #131417;
+  --color-text: #ededed;
+  --color-text-muted: #9a9a9a;
+  --color-text-faint: #6b6b6b;
+  --shadow-pop: 0 8px 28px rgba(0, 0, 0, 0.55);
 
   /* Semantic colours, used only where the state is real */
-  --color-good: #2e7d52;
-  --color-bad: #b42318;
-  --color-warn: #8a5a00;
+  --color-good: #4cc38a;
+  --color-bad: #f87171;
+  --color-warn: #fb923c;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -93,10 +95,10 @@ a {
   background: var(--color-surface);
 }
 .topNavBrand {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-body), sans-serif; letter-spacing: -0.01em;
   font-weight: 600;
-  font-size: var(--text-lg);
-  color: var(--color-accent);
+  font-size: var(--text-md);
+  color: var(--color-text);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -130,11 +132,11 @@ a {
   margin-bottom: var(--space-6);
 }
 .pageTitle {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-body), sans-serif; letter-spacing: -0.01em;
   font-size: var(--text-xl);
   font-weight: 600;
   margin: 0;
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 .headActions {
   display: flex;
@@ -173,16 +175,22 @@ a {
   cursor: progress;
 }
 .primaryGhost {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-}
-.actionBtn.primary {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-accent-contrast);
+  font-weight: 600;
+}
+.primaryGhost:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+.actionBtn.primary {
+  background: transparent;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 .actionBtn.primary:hover {
-  background: var(--color-accent-hover);
+  background: rgba(245, 165, 36, 0.1);
 }
 .linkBtn {
   background: none;
@@ -423,7 +431,7 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
-  box-shadow: 0 6px 24px rgba(27, 32, 51, 0.14);
+  box-shadow: var(--shadow-pop);
   font-size: var(--text-sm);
   color: var(--color-text);
   font-weight: 400;
@@ -561,7 +569,7 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-1) var(--space-4);
-  box-shadow: 0 6px 24px rgba(27, 32, 51, 0.14);
+  box-shadow: var(--shadow-pop);
 }
 .sourceRow {
   display: flex;

@@ -1,7 +1,7 @@
 .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-12); }
 .back { color: var(--color-text-muted); font-size: var(--text-sm); text-decoration: none; }
 .back:hover { color: var(--color-accent); }
-.title { font-family: var(--font-display), serif; font-size: var(--text-xl); font-weight: 600; color: var(--color-accent); margin: var(--space-2) 0 var(--space-1); overflow-wrap: anywhere; }
+.title { font-family: var(--font-body), sans-serif; letter-spacing: -0.01em; font-size: var(--text-xl); font-weight: 600; margin: var(--space-2) 0 var(--space-1); color: var(--color-text); overflow-wrap: anywhere; }
 .sub { color: var(--color-text-muted); font-size: var(--text-md); margin: 0 0 var(--space-3); }
 .meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); align-items: baseline; }
 .meta b { color: var(--color-text); font-weight: 600; }
@@ -11,7 +11,7 @@
 /* Sections sit on the page and are separated by a rule, not boxed. */
 .card { padding: var(--space-6) 0; border-top: 1px solid var(--color-border); }
 .card:first-of-type { border-top: none; padding-top: 0; }
-.card h2 { font-family: var(--font-display), serif; font-size: var(--text-lg); font-weight: 600; margin: 0 0 var(--space-3); color: var(--color-accent); }
+.card h2 { font-family: var(--font-body), sans-serif; letter-spacing: -0.01em; font-size: var(--text-lg); font-weight: 600; margin: 0 0 var(--space-3); color: var(--color-text); }
 .card h3 { font-size: var(--text-sm); font-weight: 600; margin: var(--space-4) 0 var(--space-2); }
 
 .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }

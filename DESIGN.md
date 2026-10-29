@@ -6,17 +6,19 @@ value inside a component. The page stylesheets (`app/jobs`, `app/board`,
 
 ## Decisions
 
-- **One accent.** Navy `--color-accent` is used for primary buttons, links,
-  the active tab and headings. There is no second brand colour.
-- **Warm neutrals.** The background, borders and muted text are one warm grey
-  family. Don't add cool greys.
+- **Dark.** Near-black page (`--color-bg`), slightly lighter surfaces for
+  lists and cards, and light grey text. The resume preview stays white because
+  that is what prints.
+- **One accent.** Amber `--color-accent` marks the match score, links, the
+  active tab and the one main action per page (filled). Row actions such as
+  "Mark applied" are outlined in amber. Headings use the text colour, not the
+  accent. There is no second brand colour.
 - **Colour means state.** `--color-good` is for applied, interview and offer.
-  `--color-bad` is for rejected and not-eligible jobs. `--color-warn` is for
-  "Check" eligibility warnings, due follow-ups and the favourite star.
+  `--color-bad` is for rejected and not-eligible jobs. `--color-warn` (orange)
+  is for "Check" eligibility warnings, due follow-ups and the favourite star.
   Every other status is plain muted text.
-- **Type.** Fraunces is the display face, for page titles and section headings
-  only. Inter is the body face. Use the size scale (`--text-xs` to `--text-xl`).
-  Don't use letter-spacing.
+- **Type.** Inter for everything. Headings get size and weight 600, with a
+  slight negative tracking. Use the size scale (`--text-xs` to `--text-xl`).
 - **Spacing.** Use `--space-1` to `--space-12` (4, 8, 12, 16, 24, 32, 48 px).
   Gaps inside a group are smaller than gaps between groups.
 - **Radius.** Use `--radius-sm` (4px) for inputs, chips and tags, and
