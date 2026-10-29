@@ -6,6 +6,8 @@ import {
   applyFilters,
   cleanFilters,
   eligibilityKind,
+  employmentLabel,
+  tidyText,
   facetCounts,
   failingSources,
   inPostedWindow,
@@ -167,4 +169,13 @@ test("saved filters with junk in them come back clean", () => {
   assert.deepEqual(f.eligibility, ["ok"]);
   assert.equal(f.favourites, false);
   assert.equal(activeFilterCount(f), 2);
+});
+
+test("job types read the same however the posting spelled them", () => {
+  assert.deepEqual(["FullTime", "Full Time", "full_time", "Intern", "internship", "N/A", "", "Seasonal"].map(employmentLabel),
+    ["Full-time", "Full-time", "Full-time", "Internship", "Internship", "", "", "Seasonal"]);
+});
+
+test("posting text loses stray indents and extra blank lines", () => {
+  assert.equal(tidyText("  Who You Are:\n You are great\n\n\n\n What You'll Do  "), "Who You Are:\nYou are great\n\nWhat You'll Do");
 });

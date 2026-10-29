@@ -119,7 +119,7 @@ function EmailBlock({ contact, field, kind, title, draftLabel, outreach, patch, 
             <a className={s.ghost} href={mailtoUrl(url)}>
               Open in mail app
             </a>
-            <button className={s.btn} disabled={!outreach.smtp.configured || noEmail || !d.body} onClick={() => setDialog(true)}>
+            <button className={s.ghost} disabled={!outreach.smtp.configured || noEmail || !d.body} onClick={() => setDialog(true)}>
               Send…
             </button>
           </div>
@@ -312,7 +312,7 @@ export default function Outreach({ jobId, job, initialContacts, linkedin, domain
       ))}
 
       <div className={s.row}>
-        <button className={s.btn} onClick={() => setOpen(!open)}>
+        <button className={s.ghost} onClick={() => setOpen(!open)}>
           {open ? "Close" : "Add a contact"}
         </button>
       </div>
@@ -337,7 +337,7 @@ export default function Outreach({ jobId, job, initialContacts, linkedin, domain
           {form.emailIsGuess && <p className={s.warn}>This email is a guess. Check it before you send.</p>}
           {err && <p className={s.error}>{err}</p>}
           <div className={s.row}>
-            <button className={s.btn} disabled={!form.name.trim()} onClick={add}>
+            <button className={s.ghost} disabled={!form.name.trim()} onClick={add}>
               Save contact
             </button>
           </div>

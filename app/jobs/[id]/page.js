@@ -9,6 +9,7 @@ import { api, CopyButton } from "./ui.js";
 import FavouriteStar from "../../FavouriteStar.js";
 import Requirements from "./Requirements.js";
 import { statusLabel } from "../../../lib/board.js";
+import { tidyText } from "../../../lib/jobFilters.js";
 
 function host(link) {
   try {
@@ -151,7 +152,7 @@ export default function JobPage({ params }) {
         {posting.text ? (
           <>
             {posting.live && <p className={s.note}>This job has no saved copy of the posting, so this text comes from the posting page now and may be cut off.</p>}
-            <div className={s.posting}>{posting.text}</div>
+            <div className={s.posting}>{tidyText(posting.text)}</div>
           </>
         ) : (
           <p className={s.note}>No posting text saved. Open the application link to read it.</p>

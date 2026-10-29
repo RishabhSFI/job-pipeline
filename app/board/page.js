@@ -223,6 +223,8 @@ export default function Board() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return jobs.filter((j) => {
+      // Not-eligible jobs aren't part of the pipeline. The Jobs list keeps them.
+      if (j.Status === "Not Eligible") return false;
       if (track && j["CV Version Used"] !== track) return false;
       if (!q) return true;
       return `${j["Role Title"]} ${j.Company}`.toLowerCase().includes(q);

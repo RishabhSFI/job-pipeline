@@ -36,7 +36,7 @@ function Draft({ id, kind, initial }) {
     <div>
       <h3>{kind.title}</h3>
       <div className={s.row} style={{ marginTop: 0 }}>
-        <button className={s.btn} disabled={busy} onClick={generate}>
+        <button className={s.ghost} disabled={busy} onClick={generate}>
           {busy ? "Writing…" : text ? "Regenerate" : kind.button}
         </button>
         <CopyButton text={text} />

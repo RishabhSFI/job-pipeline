@@ -9,6 +9,7 @@ import {
   postedLabel,
   DEFAULT_FILTERS,
   scoreReasons,
+  employmentLabel,
 } from "../lib/jobFilters.js";
 import profile from "../config/profile.json";
 import countries from "../config/countries.json";
@@ -444,12 +445,14 @@ export default function Dashboard() {
                     {job["Country/Remote"] && (
                       <span className="location">{job["Country/Remote"]}</span>
                     )}
-                    {job["Employment Type"] &&
-                      !["Not specified", "N/A"].includes(job["Employment Type"]) && (
-                        <span className="location">
-                          {job["Employment Type"]}
-                        </span>
-                      )}
+                    {employmentLabel(job["Employment Type"]) && (
+                      <span className="location">{employmentLabel(job["Employment Type"])}</span>
+                    )}
+                    {(activeTab === "all" || activeTab === "favourites") && (
+                      <span className={`statusText ${STATUS_TONE[job.Status] || ""}`}>
+                        {statusLabel(job.Status)}
+                      </span>
+                    )}
                   </div>
                   <div className="jobMetaLine">
                     {job["Match Score"] && (
@@ -463,15 +466,6 @@ export default function Dashboard() {
                       job["Est. Salary"] !== "Not listed" && (
                         <span className="salaryTag">{job["Est. Salary"]}</span>
                       )}
-                    {job["CV Version Used"] && (
-                      <span className="cvTag">
-                        {CV_LABEL[job["CV Version Used"]] ||
-                          job["CV Version Used"]}
-                      </span>
-                    )}
-                    <span className={`statusText ${STATUS_TONE[job.Status] || ""}`}>
-                      {statusLabel(job.Status)}
-                    </span>
                   </div>
                   {applyEmail && (
                     <div className="applyEmail">

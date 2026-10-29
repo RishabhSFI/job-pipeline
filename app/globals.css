@@ -185,12 +185,11 @@ a {
   border-color: var(--color-accent-hover);
 }
 .actionBtn.primary {
-  background: transparent;
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  font-weight: 500;
 }
 .actionBtn.primary:hover {
-  background: rgba(245, 165, 36, 0.1);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 .linkBtn {
   background: none;
