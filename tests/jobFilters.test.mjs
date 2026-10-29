@@ -1,8 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  DEFAULT_FILTERS,
+  activeFilterCount,
   applyFilters,
   cleanFilters,
+  eligibilityKind,
+  facetCounts,
   failingSources,
   inPostedWindow,
   locationMatches,
@@ -60,7 +64,7 @@ test("filters combine, with search over role and company", () => {
 
 test("saved filters with unknown values fall back to the defaults", () => {
   const cleaned = cleanFilters({ type: "Weird", track: "gone", posted: "7d", search: 5 }, ["startup"]);
-  assert.deepEqual(cleaned, { type: "all", posted: "7d", location: "all", track: "all", search: "", sort: "match" });
+  assert.deepEqual(cleaned, { ...DEFAULT_FILTERS, posted: "7d" });
   assert.equal(cleanFilters(null).type, "all");
 });
 
@@ -118,4 +122,49 @@ test("posted labels count whole days and say when only the found date is known",
   assert.equal(postedLabel({ "Posted Date": "2026-10-21" }, now), "Posted 7 days ago");
   assert.equal(postedLabel({ "Posted Date": "", "Date Found": "2026-10-26" }, now), "Found 2 days ago");
   assert.equal(postedLabel({}, now), "");
+});
+
+const pool = [
+  { Company: "Uline", "Role Title": "Operations Analyst Intern", "Country/Remote": "Pleasant Prairie, WI", Status: "Needs Manual Apply", Eligibility: "Note: US job, needs a TN visa" },
+  { Company: "Signet", "Role Title": "Business Analyst - Sourcing", "Country/Remote": "Akron, OH / Irving, TX", Status: "Awaiting Your Approval", Eligibility: "" },
+  { Company: "Uline", "Role Title": "Senior Buyer", "Country/Remote": "Toronto, ON", Status: "Applied", Eligibility: "Check: Asks for 3+ years of experience", Favourite: "★" },
+  { Company: "Amgen", "Role Title": "MBA Intern", "Country/Remote": "Remote", Status: "Not Eligible", Eligibility: "Not eligible: For graduate students" },
+];
+const titles = (list) => list.map((j) => j["Role Title"]);
+
+test("several companies, places and statuses can be picked at once", () => {
+  assert.deepEqual(titles(applyFilters(pool, { companies: ["Uline", "Amgen"] })), ["Operations Analyst Intern", "Senior Buyer", "MBA Intern"]);
+  assert.deepEqual(titles(applyFilters(pool, { places: ["Irving, TX", "Remote"] })), ["Business Analyst - Sourcing", "MBA Intern"]);
+  assert.deepEqual(titles(applyFilters(pool, { statuses: ["Applied", "Not Eligible"] })), ["Senior Buyer", "MBA Intern"]);
+});
+
+test("title words narrow by any included word and drop any excluded one", () => {
+  assert.deepEqual(titles(applyFilters(pool, { include: "analyst, buyer" })), ["Operations Analyst Intern", "Business Analyst - Sourcing", "Senior Buyer"]);
+  assert.deepEqual(titles(applyFilters(pool, { exclude: "senior, mba" })), ["Operations Analyst Intern", "Business Analyst - Sourcing"]);
+});
+
+test("eligibility groups come from the Eligibility cell", () => {
+  assert.deepEqual(pool.map(eligibilityKind), ["tn", "ok", "check", "no"]);
+  assert.deepEqual(titles(applyFilters(pool, { eligibility: ["ok", "tn"] })), ["Operations Analyst Intern", "Business Analyst - Sourcing"]);
+  assert.deepEqual(titles(applyFilters(pool, { favourites: true })), ["Senior Buyer"]);
+});
+
+test("each option's count ignores its own filter but respects the others", () => {
+  const counts = facetCounts(pool, { ...DEFAULT_FILTERS, companies: ["Uline"], eligibility: ["ok", "tn", "check"] }, "companies");
+  assert.deepEqual(counts, [{ value: "Uline", count: 2 }, { value: "Signet", count: 1 }]);
+  const places = facetCounts(pool, { ...DEFAULT_FILTERS, companies: ["Signet"] }, "places");
+  assert.deepEqual(places, [{ value: "Akron, OH", count: 1 }, { value: "Irving, TX", count: 1 }]);
+});
+
+test("a picked option stays listed when nothing matches it any more", () => {
+  const counts = facetCounts(pool, { ...DEFAULT_FILTERS, companies: ["Gone Inc"], statuses: ["Applied"] }, "companies");
+  assert.deepEqual(counts.find((c) => c.value === "Gone Inc"), { value: "Gone Inc", count: 0 });
+});
+
+test("saved filters with junk in them come back clean", () => {
+  const f = cleanFilters({ companies: ["Uline", 4, "x".repeat(200)], eligibility: ["ok", "bogus"], favourites: "yes" });
+  assert.deepEqual(f.companies, ["Uline"]);
+  assert.deepEqual(f.eligibility, ["ok"]);
+  assert.equal(f.favourites, false);
+  assert.equal(activeFilterCount(f), 2);
 });

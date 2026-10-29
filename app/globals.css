@@ -246,14 +246,15 @@ a {
 }
 
 /* Filters */
-.filterBar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.filters {
   margin: var(--space-4) 0 var(--space-1);
 }
-.filterBar select,
-.filterBar input {
+.filterTop {
+  display: flex;
+  gap: var(--space-2);
+}
+.filters select,
+.filters input {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text);
@@ -262,13 +263,116 @@ a {
   font: inherit;
   font-size: var(--text-sm);
 }
-.filterBar input {
-  flex: 1 1 200px;
-}
-.filterBar select:focus,
-.filterBar input:focus {
+.filters select:focus,
+.filters input:focus {
   outline: 2px solid var(--color-accent);
   outline-offset: -1px;
+}
+.filterSearch {
+  flex: 1;
+  min-width: 0;
+}
+.filterOn {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.filterPanel {
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-6);
+}
+.facet {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.facet legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.facetSelects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.facetSearch {
+  width: 100%;
+}
+.facetList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.facetOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  padding: 2px 0;
+  cursor: pointer;
+}
+.facetOption input {
+  accent-color: var(--color-accent);
+  margin: 0;
+}
+.facetOption.zero {
+  color: var(--color-text-faint);
+}
+.facetLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.facetCount {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.facetEmpty {
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+}
+.facet .linkBtn {
+  align-self: flex-start;
+  font-size: var(--text-xs);
+}
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.filterChip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.filterChip:hover {
+  border-color: var(--color-accent);
+}
+.filterChip span {
+  color: var(--color-text-faint);
+  margin-left: var(--space-1);
 }
 .matchLine {
   display: flex;
@@ -625,5 +729,11 @@ a {
   .jobActions {
     justify-content: flex-start;
     max-width: none;
+  }
+  .filterTop {
+    flex-wrap: wrap;
+  }
+  .filterSearch {
+    flex-basis: 100%;
   }
 }

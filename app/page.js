@@ -6,7 +6,6 @@ import {
   applyFilters,
   cleanFilters,
   sortJobs,
-  SORTS,
   postedLabel,
   DEFAULT_FILTERS,
   scoreReasons,
@@ -15,6 +14,7 @@ import profile from "../config/profile.json";
 import countries from "../config/countries.json";
 import XSearches from "./XSearches.js";
 import FetchStatus from "./FetchStatus.js";
+import FilterPanel from "./FilterPanel.js";
 import FavouriteStar, { isFavourite } from "./FavouriteStar.js";
 import EligibilityTag from "./EligibilityTag.js";
 import { statusLabel } from "../lib/board.js";
@@ -255,7 +255,6 @@ export default function Dashboard() {
     }
   }, [filters, filtersLoaded]);
 
-  const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
   const filtersActive = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS);
 
   async function copy(text, key) {
@@ -372,82 +371,19 @@ export default function Dashboard() {
       </div>
 
       {activeTab !== "x" && (
-        <div className="filterBar">
-          <select
-            aria-label="Job type"
-            value={filters.type}
-            onChange={(e) => setFilter("type", e.target.value)}
-          >
-            <option value="all">All types</option>
-            <option value="Internship">Internship</option>
-            <option value="Full-time">Full-time</option>
-          </select>
-          <select
-            aria-label="Posted"
-            value={filters.posted}
-            onChange={(e) => setFilter("posted", e.target.value)}
-          >
-            <option value="any">Any time</option>
-            <option value="24h">Last 24 hours</option>
-            <option value="48h">Last 48 hours</option>
-            <option value="7d">Last 7 days</option>
-          </select>
-          <select
-            aria-label="Location"
-            value={filters.location}
-            onChange={(e) => setFilter("location", e.target.value)}
-          >
-            <option value="all">Anywhere</option>
-            <option value="canada">Canada</option>
-            <option value="us">US</option>
-            <option value="remote">Remote</option>
-          </select>
-          <select
-            aria-label="Track"
-            value={filters.track}
-            onChange={(e) => setFilter("track", e.target.value)}
-          >
-            <option value="all">All tracks</option>
-            {TRACK_KEYS.map((k) => (
-              <option key={k} value={k}>
-                {profile.tracks[k].label}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Sort"
-            value={filters.sort}
-            onChange={(e) => setFilter("sort", e.target.value)}
-          >
-            {Object.entries(SORTS).map(([key, label]) => (
-              <option key={key} value={key}>
-                Sort: {label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="search"
-            aria-label="Search role or company"
-            placeholder="Search role or company"
-            value={filters.search}
-            onChange={(e) => setFilter("search", e.target.value)}
-          />
-        </div>
+        <FilterPanel
+          jobs={inTab}
+          filters={filters}
+          setFilters={setFilters}
+          tracks={profile.tracks}
+          regions={countries.regions}
+        />
       )}
       {activeTab !== "x" && (!loading || jobs.length > 0) && (
         <div className="matchLine">
           {visible.length === inTab.length
             ? `${visible.length} ${visible.length === 1 ? "job" : "jobs"}`
             : `${visible.length} of ${inTab.length} jobs match`}
-          {filtersActive && (
-            <button
-              type="button"
-              className="linkBtn"
-              onClick={() => setFilters(DEFAULT_FILTERS)}
-            >
-              Clear filters
-            </button>
-          )}
         </div>
       )}
 
