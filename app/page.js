@@ -17,6 +17,7 @@ import countries from "../config/countries.json";
 import XSearches from "./XSearches.js";
 import FetchStatus from "./FetchStatus.js";
 import FavouriteStar, { isFavourite } from "./FavouriteStar.js";
+import EligibilityTag from "./EligibilityTag.js";
 
 const STATUS_COLOR = {
   "Awaiting Your Approval": "var(--status-awaiting)",
@@ -45,7 +46,7 @@ const FILTERS_KEY = "jobFilters";
 const TRACK_KEYS = Object.keys(profile.tracks);
 
 const TABS = [
-  { key: "all", label: "All", match: (s) => s !== "Closed" },
+  { key: "all", label: "All", match: (s) => s !== "Closed" && s !== "Not Eligible" },
   { key: "favourites", label: "★ Favourites", match: (s, job) => isFavourite(job) },
   {
     key: "awaiting",
@@ -62,6 +63,7 @@ const TABS = [
   { key: "offer", label: "Offer", match: (s) => s === "Offer" },
   { key: "rejected", label: "Rejected", match: (s) => s === "Rejected" },
   { key: "closed", label: "Closed", match: (s) => s === "Closed" },
+  { key: "noteligible", label: "Not eligible", match: (s) => s === "Not Eligible" },
 ];
 
 const KIT_STATUSES = [
@@ -398,7 +400,7 @@ export default function Dashboard() {
             onClick={() => setActiveTab(t.key)}
           >
             {t.label}
-            {t.key === "favourites" && counts.favourites ? ` (${counts.favourites})` : ""}
+            {(t.key === "favourites" || t.key === "noteligible") && counts[t.key] ? ` (${counts[t.key]})` : ""}
           </button>
         ))}
         <button
@@ -564,6 +566,7 @@ export default function Dashboard() {
                     {job["Match Score"] && (
                       <ScoreTag job={job} />
                     )}
+                    <EligibilityTag text={job.Eligibility} />
                     {postedLabel(job) && (
                       <span className="cvTag">{postedLabel(job)}</span>
                     )}

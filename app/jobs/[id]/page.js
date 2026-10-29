@@ -7,6 +7,7 @@ import Writing from "./Writing.js";
 import Outreach from "./Outreach.js";
 import { api, CopyButton } from "./ui.js";
 import FavouriteStar from "../../FavouriteStar.js";
+import Requirements from "./Requirements.js";
 
 const STATUS_COLOR = {
   "Awaiting Your Approval": "var(--status-awaiting)",
@@ -222,6 +223,7 @@ export default function JobPage({ params }) {
         </div>
       </section>
 
+      <Requirements id={id} eligibility={job.Eligibility} aiAvailable={aiAvailable} />
       <Writing id={id} drafts={drafts} aiAvailable={aiAvailable} />
       <Outreach jobId={id} job={job} initialContacts={contacts} linkedin={linkedin} domain={domain} outreach={outreach} aiAvailable={aiAvailable} />
     </main>

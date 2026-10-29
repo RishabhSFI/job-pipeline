@@ -635,3 +635,23 @@ a.actionBtn {
 .favStar.on {
   color: #d99a00;
 }
+
+.eligTag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: normal;
+}
+.eligTag.no {
+  color: var(--status-rejected);
+}
+.eligTag.check {
+  color: var(--status-manual);
+}
+.eligTag.note {
+  color: var(--text-muted);
+  border-color: var(--border);
+  font-weight: 500;
+}

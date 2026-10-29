@@ -140,6 +140,13 @@ export async function runChecks({ offline = false } = {}) {
   add("Resume Studio has your resume (data/resume.json)", !!resumeName && resumeName !== "Your Name",
     resumeName ? "Replace the template in data/resume.json with your resume, or run npm run setup to import it with Gemini." : "Run npm run setup.");
 
+  let facts = {};
+  try {
+    facts = JSON.parse(fs.readFileSync(kitFile, "utf-8")).eligibility || {};
+  } catch {}
+  add("Eligibility facts set (who can hire you, when you graduate)", !!(facts.workIn?.length && facts.graduation),
+    "Fill in \"eligibility\" in config/applyKit.json (countries you can work in, graduation month) so jobs you can't take are hidden.");
+
   add("Gemini key for AI writing", !!env?.GEMINI_API_KEY,
     "Optional and free. Run npm run setup and choose to add a Gemini key.", true);
 

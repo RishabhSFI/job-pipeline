@@ -181,6 +181,7 @@ where you left off and skips what is already done.
 | What | Where |
 |---|---|
 | Your name, links and saved answers | Replace every `EDIT ME` in `config/applyKit.json` |
+| Who can hire you: countries you can work in, graduation month, degree, languages, certifications | `eligibility` in `config/applyKit.json`. Jobs you can't take are hidden (see the Not eligible tab); jobs to double-check get a warning |
 | A short pitch for each kind of role | `summaries` in `config/applyKit.json` |
 | The roles you want and the words that score them | `config/profile.json` |
 | What the job boards are searched for | `search` in `config/profile.json` |
