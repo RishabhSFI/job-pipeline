@@ -4,7 +4,7 @@
 // prepared for them. Checks every file before copying, and backs up anything
 // it replaces to data/backups/<time>/.
 //
-//   npm run install-pack -- ~/Downloads/karanvir-pack.zip
+//   npm run install-pack -- ~/Downloads/friends-pack.zip
 //   npm run install-pack -- path/to/pack-folder
 //
 // What goes where (by file name inside the pack):
