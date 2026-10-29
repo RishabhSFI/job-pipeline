@@ -49,3 +49,17 @@ test("email replies are checked and the note is capped at 300 characters", () =>
   assert.throws(() => parseEmailDraft({ subject: "Hi" }), /no email text/);
   assert.ok(parseNote('"' + "word ".repeat(100) + '"').length <= 300);
 });
+
+test("base letters keep the person's words and only fill the placeholders", async () => {
+  const { fillBaseLetter } = await import("../lib/writing.js");
+  const out = fillBaseLetter("Dear {company} team,\n\nI'm applying for {role}. {why}\n\n\n{summary}\n\nBest,\n{name}", {
+    company: "MNP", role: "Valuations Intern", why: "I want to work on owner-managed deals.", summary: "S.", name: "K",
+  });
+  assert.equal(out, "Dear MNP team,\n\nI'm applying for Valuations Intern. I want to work on owner-managed deals.\n\nS.\n\nBest,\nK");
+});
+
+test("AI replies naming a never-mention word are caught, case-insensitively", async () => {
+  const { forbiddenIn } = await import("../lib/ai.js");
+  assert.equal(forbiddenIn("I interned at bell canada last year", ["Bell Canada", "City of Brampton"]), "Bell Canada");
+  assert.equal(forbiddenIn("I worked at Freda Capital", ["Bell Canada"]), null);
+});

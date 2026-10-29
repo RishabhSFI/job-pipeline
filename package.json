@@ -11,7 +11,8 @@
     "check-companies": "node scripts/check-companies.mjs",
     "test": "node --test \"tests/*.test.mjs\"",
     "doctor": "node scripts/doctor.mjs",
-    "setup": "node scripts/setup.mjs"
+    "setup": "node scripts/setup.mjs",
+    "install-pack": "node scripts/install-pack.mjs"
   },
   "dependencies": {
     "googleapis": "144.0.0",

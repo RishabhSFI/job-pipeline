@@ -5,11 +5,27 @@
 import { NextResponse } from "next/server";
 import { generate, aiRoute } from "../../../../../lib/ai.js";
 import { loadContext } from "../../../../../lib/jobContext.js";
-import { SYSTEM, coverLetterPrompt, whyCompanyPrompt } from "../../../../../lib/writing.js";
+import { SYSTEM, coverLetterPrompt, whyCompanyPrompt, whyFirmSentencePrompt, fillBaseLetter } from "../../../../../lib/writing.js";
 import { readJson, writeJson } from "../../../../../lib/store.js";
 
 export const maxDuration = 60;
 const PROMPTS = { cover: coverLetterPrompt, why: whyCompanyPrompt };
+
+// Base-letter mode (coverLetterBase in the apply kit): the letter is the
+// person's own text; AI only writes the {why} sentence.
+async function fromBaseLetter(ctx) {
+  const base = ctx.kit.coverLetterBase.trim();
+  if (!base) {
+    throw Object.assign(
+      new Error("Cover letters use your base letter, which is still empty. Write it in config/applyKit.json under coverLetterBase, using {company}, {role}, {why}, {summary} and {name}."),
+      { code: "NO_BASE" },
+    );
+  }
+  const why = base.includes("{why}") ? await generate({ system: SYSTEM, prompt: whyFirmSentencePrompt(ctx.ai) }) : "";
+  const name = (ctx.kit.profile || []).find((p) => p.label === "Full name")?.value || "";
+  const summary = ctx.kit.summaries?.[ctx.ai.trackKey] || "";
+  return fillBaseLetter(base, { company: ctx.row.Company, role: ctx.row["Role Title"], why, summary, name });
+}
 
 export async function POST(request, { params }) {
   const { kind } = await request.json().catch(() => ({}));
@@ -17,7 +33,9 @@ export async function POST(request, { params }) {
   const result = await aiRoute(async () => {
     const ctx = await loadContext(params.id);
     if (!ctx) throw Object.assign(new Error("Job not found"), { code: "NOT_FOUND" });
-    const text = await generate({ system: SYSTEM, prompt: PROMPTS[kind](ctx.ai) });
+    const text = kind === "cover" && typeof ctx.kit.coverLetterBase === "string"
+      ? await fromBaseLetter(ctx)
+      : await generate({ system: SYSTEM, prompt: PROMPTS[kind](ctx.ai) });
     const drafts = readJson(`drafts/${params.id}`, {});
     drafts[kind] = { text, generatedAt: new Date().toISOString() };
     writeJson(`drafts/${params.id}`, drafts);
